@@ -1,0 +1,8 @@
+{
+  "parent": "mechanicsplus:block/facing_block",
+  "textures": {
+    "front": "mechanicsplus:block/breaker_block_front_inactive",
+    "top": "mechanicsplus:block/breaker_block_top",
+    "side": "mechanicsplus:block/breaker_block_side"
+  }
+}

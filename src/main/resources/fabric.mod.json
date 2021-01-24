@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "mechanicsplus",
   "version": "${version}",
 
   "name": "Mechanics Plus",
@@ -20,6 +20,9 @@
   "entrypoints": {
     "main": [
       "net.fabricmc.mechanicsplus.MechanicsPlusMod"
+    ],
+    "client": [
+      "net.fabricmc.mechanicsplus.MechanicsPlusClientMod"
     ]
   },
   "mixins": [
