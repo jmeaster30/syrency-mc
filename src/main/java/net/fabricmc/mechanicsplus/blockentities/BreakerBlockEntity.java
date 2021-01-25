@@ -34,7 +34,8 @@ public class BreakerBlockEntity extends BlockEntity
 
   private final DefaultedList<ItemStack> items = DefaultedList.ofSize(9, ItemStack.EMPTY);
 
-  private int testNumber = 7;
+  private int actionDelay = 4;
+  private boolean activated = false;
 
   public BreakerBlockEntity() {
     super(MechanicsPlusMod.BREAKER_BLOCK_ENTITY);
@@ -46,7 +47,8 @@ public class BreakerBlockEntity extends BlockEntity
 
     Inventories.toTag(tag, items);
 
-    tag.putInt("testNumber", testNumber);
+    tag.putInt("actionDelay", actionDelay);
+    tag.putBoolean("activated", activated);
 
     return tag;
   }
@@ -57,7 +59,8 @@ public class BreakerBlockEntity extends BlockEntity
 
     Inventories.fromTag(tag, items);
 
-    testNumber = tag.getInt("testNumber");
+    actionDelay = tag.getInt("actionDelay");
+    activated = tag.getBoolean("activated");
   }
 
   @Override
@@ -97,37 +100,40 @@ public class BreakerBlockEntity extends BlockEntity
 
   @Override
   public void tick() {
-    if (world.isReceivingRedstonePower(pos)) {
+    if (actionDelay == 0) {
       Direction facing = world.getBlockState(pos).get(Properties.FACING);
       BlockPos inFront = pos.add(facing.getVector());
-
-      System.out.println("MECHANICSPLUS:: Breaker Go!!!!!!");
-
-      System.out.println("MECHANICSPLUS:: Block position : " + inFront.toShortString());
 
       BlockState breakingState = world.getBlockState(inFront);
       BlockEntity breakingEntity = breakingState.getBlock().hasBlockEntity() ? world.getBlockEntity(inFront) : null;
 
       List<ItemStack> droppedStacks = new ArrayList<ItemStack>();
       if (world instanceof ServerWorld) {
-        System.out.println("MECHANICSPLUS:: ServerWorld");
         droppedStacks = Block.getDroppedStacks(breakingState, (ServerWorld) world, inFront, breakingEntity);
       }
-
-      System.out.println("MECHANICSPLUS:: Dropped Stacks");
-      droppedStacks.forEach((itemStack) -> {
-        System.out.println("MECHANICSPLUS:: " + itemStack.getItem().getName() + " (" + itemStack.getCount() + ")");
-      });
-      System.out.println("MECHANICSPLUS:: Done Dropped Stacks");
 
       List<ItemStack> leftovers = addToInventory(droppedStacks);
       leftovers.forEach((itemStack) -> {
         Block.dropStack(world, pos, itemStack);
       });
 
-      int maxUpdateDepth = 64; // idk what this value should be
+      int maxUpdateDepth = 64;
 
       world.breakBlock(inFront, false, (Entity) null, maxUpdateDepth);
+      actionDelay = 4;
+    }
+
+    if (actionDelay < 4) {
+      actionDelay -= 1;
+    }
+
+    if (world.isReceivingRedstonePower(pos) && actionDelay == 4 && !activated) {
+      actionDelay -= 1;
+      activated = true;
+    }
+
+    if (!world.isReceivingRedstonePower(pos)) {
+      activated = false;
     }
   }
 }
