@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.fabricmc.mechanicsplus.MechanicsPlusMod;
+import net.fabricmc.mechanicsplus.blocks.BreakerBlock;
 import net.fabricmc.mechanicsplus.helpers.ImplementedInventory;
 import net.fabricmc.mechanicsplus.screens.BreakerScreenHandler;
 import net.minecraft.block.Block;
@@ -101,7 +102,8 @@ public class BreakerBlockEntity extends BlockEntity
   @Override
   public void tick() {
     if (actionDelay == 0) {
-      Direction facing = world.getBlockState(pos).get(Properties.FACING);
+      BlockState thisState = world.getBlockState(pos);
+      Direction facing = thisState.get(Properties.FACING);
       BlockPos inFront = pos.add(facing.getVector());
 
       BlockState breakingState = world.getBlockState(inFront);
@@ -121,6 +123,7 @@ public class BreakerBlockEntity extends BlockEntity
 
       world.breakBlock(inFront, false, (Entity) null, maxUpdateDepth);
       actionDelay = 4;
+      world.setBlockState(pos, thisState.with(BreakerBlock.ACTIVE, false));
     }
 
     if (actionDelay < 4) {
@@ -130,9 +133,11 @@ public class BreakerBlockEntity extends BlockEntity
     if (world.isReceivingRedstonePower(pos) && actionDelay == 4 && !activated) {
       actionDelay -= 1;
       activated = true;
+      BlockState thisState = world.getBlockState(pos);
+      world.setBlockState(pos, thisState.with(BreakerBlock.ACTIVE, true));
     }
 
-    if (!world.isReceivingRedstonePower(pos)) {
+    if (!world.isReceivingRedstonePower(pos) && actionDelay == 4) {
       activated = false;
     }
   }
