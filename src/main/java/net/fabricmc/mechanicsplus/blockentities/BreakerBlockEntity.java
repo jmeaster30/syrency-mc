@@ -9,6 +9,7 @@ import net.fabricmc.mechanicsplus.helpers.ImplementedInventory;
 import net.fabricmc.mechanicsplus.screens.BreakerScreenHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -107,7 +108,15 @@ public class BreakerBlockEntity extends BlockEntity
       BlockPos inFront = pos.add(facing.getVector());
 
       BlockState breakingState = world.getBlockState(inFront);
-      BlockEntity breakingEntity = breakingState.getBlock().hasBlockEntity() ? world.getBlockEntity(inFront) : null;
+      Block breakingBlock = breakingState.getBlock();
+      if(breakingBlock.is(Blocks.BEDROCK))
+      {
+        actionDelay = 4;
+        world.setBlockState(pos, thisState.with(BreakerBlock.ACTIVE, false));
+        return;
+      }
+
+      BlockEntity breakingEntity = breakingBlock.hasBlockEntity() ? world.getBlockEntity(inFront) : null;
 
       List<ItemStack> droppedStacks = new ArrayList<ItemStack>();
       if (world instanceof ServerWorld) {
