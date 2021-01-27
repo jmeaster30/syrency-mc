@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "mechanicsplus:block/autocrafter_block" }
+  }
+}

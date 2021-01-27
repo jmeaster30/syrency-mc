@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:block",
+  "pools" : [
+    {
+      "name": "mechanicsplus:autocrafter_pool",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "mechanicsplus:autocrafter_block"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}

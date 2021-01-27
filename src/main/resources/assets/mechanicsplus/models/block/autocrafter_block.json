@@ -1,0 +1,8 @@
+{
+  "parent": "mechanicsplus:block/table_block",
+  "textures": {
+    "bottom": "mechanicsplus:block/autocrafter_bottom",
+    "top": "mechanicsplus:block/autocrafter_top",
+    "side": "mechanicsplus:block/autocrafter_side"
+  }
+}

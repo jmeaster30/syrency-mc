@@ -1,49 +1,40 @@
 package net.fabricmc.mechanicsplus.blocks;
 
-import net.fabricmc.mechanicsplus.blockentities.BreakerBlockEntity;
+import net.fabricmc.mechanicsplus.blockentities.AutoCrafterBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.FacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.Properties;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-public class BreakerBlock extends FacingBlock implements BlockEntityProvider {
+public class AutoCrafterBlock extends Block implements BlockEntityProvider{
 
-  // warning we are not changing this at all and we didn't set up the different
-  // variants for the model
-  public static final BooleanProperty ACTIVE = BooleanProperty.of("active");
-
-  public BreakerBlock(Settings settings) {
+  public AutoCrafterBlock(Settings settings) {
     super(settings);
-    setDefaultState(getStateManager().getDefaultState().with(Properties.FACING, Direction.NORTH).with(ACTIVE, false));
+    setDefaultState(getStateManager().getDefaultState());
   }
-
+  
   @Override
   public void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
-    stateManager.add(ACTIVE);
-    stateManager.add(Properties.FACING);
+    return;
   }
-
+  
   @Override
   public BlockEntity createBlockEntity(BlockView blockView) {
-    return new BreakerBlockEntity();
+    return new AutoCrafterBlockEntity();
   }
 
   @Override
@@ -63,7 +54,7 @@ public class BreakerBlock extends FacingBlock implements BlockEntityProvider {
   }
 
   public BlockState getPlacementState(ItemPlacementContext ctxt) {
-    return (BlockState) this.getDefaultState().with(FACING, ctxt.getPlayerLookDirection());
+    return (BlockState) this.getDefaultState();
   }
 
   @Override
@@ -89,8 +80,8 @@ public class BreakerBlock extends FacingBlock implements BlockEntityProvider {
 
       BlockEntity blockEntity = world.getBlockEntity(pos);
 
-      if (blockEntity instanceof BreakerBlockEntity) {
-        ItemScatterer.spawn(world, pos, (BreakerBlockEntity) blockEntity);
+      if (blockEntity instanceof AutoCrafterBlockEntity) {
+        ItemScatterer.spawn(world, pos, (AutoCrafterBlockEntity) blockEntity);
         world.updateComparators(pos, this);
       }
 
