@@ -15,7 +15,8 @@ public class AutoCrafterScreen extends HandledScreen<ScreenHandler> {
 
   public AutoCrafterScreen(ScreenHandler handler, PlayerInventory inventory, Text title) {
     super(handler, inventory, title);
-    backgroundHeight = 222;
+    backgroundHeight = 222; //the height of the gui screen
+    playerInventoryTitleY = backgroundHeight - 94;
   }
 
   @Override
