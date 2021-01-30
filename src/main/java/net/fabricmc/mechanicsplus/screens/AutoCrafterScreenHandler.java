@@ -6,6 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.mechanicsplus.MechanicsPlusMod;
 import net.fabricmc.mechanicsplus.helpers.BlockedCraftingResultSlot;
+import net.fabricmc.mechanicsplus.helpers.NoInputSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
@@ -20,9 +21,7 @@ import net.minecraft.recipe.RecipeFinder;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.book.RecipeBookCategory;
 import net.minecraft.screen.AbstractRecipeScreenHandler;
-import net.minecraft.screen.CraftingScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.slot.CraftingResultSlot;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
@@ -67,7 +66,7 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
     this.addSlot(new BlockedCraftingResultSlot(playerInventory.player, this.input, this.result, 0, 110, 35));
 
     //output slot
-    this.addSlot(new Slot(this.inventory, 0, 142, 35));
+    this.addSlot(new NoInputSlot(this.inventory, 0, 142, 35));
 
     int m;
     int l;

@@ -1,16 +1,20 @@
 package net.fabricmc.mechanicsplus.blockentities;
 
+import java.util.Optional;
+
 import net.fabricmc.mechanicsplus.MechanicsPlusMod;
+import net.fabricmc.mechanicsplus.helpers.EntityCraftingInventory;
 import net.fabricmc.mechanicsplus.screens.AutoCrafterScreenHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.recipe.CraftingRecipe;
+import net.minecraft.recipe.RecipeType;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
@@ -19,7 +23,6 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Tickable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.Direction;
-import net.minecraft.block.CraftingTableBlock;
 
 public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventory, NamedScreenHandlerFactory, Tickable {
 
@@ -33,6 +36,8 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
     }
   }
 
+  private int delay = 4;
+  private boolean activated = false;
   private final DefaultedList<ItemStack> items = DefaultedList.ofSize(37, ItemStack.EMPTY);
   // 0 : output
   // 1-9 : crafting table
@@ -48,6 +53,9 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
 
     Inventories.toTag(tag, items);
 
+    tag.putInt("delay", delay);
+    tag.putBoolean("activated", activated);
+
     return tag;
   }
 
@@ -56,6 +64,9 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
     super.fromTag(state, tag);
 
     Inventories.fromTag(tag, items);
+
+    delay = tag.getInt("delay");
+    activated = tag.getBoolean("activated");
   }
 
   @Override
@@ -71,6 +82,48 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
   @Override
   public void tick() {
 
+    if (delay == 0) {
+      if (!world.isClient) {
+        EntityCraftingInventory craftingInventory = new EntityCraftingInventory(3, 3);
+        //load up crafting inventory
+        for(int i = 1; i < 10; i++)
+          craftingInventory.setStack(i - 1, items.get(i));
+
+        ItemStack itemStack = ItemStack.EMPTY;
+        Optional<CraftingRecipe> optional = world.getServer().getRecipeManager().getFirstMatch(RecipeType.CRAFTING,
+            craftingInventory, world);
+        if (optional.isPresent()) {
+          CraftingRecipe recipe = optional.get();
+          itemStack = recipe.craft(craftingInventory);
+          
+          //also we currently replace the item in the output
+          // but we should check if it is the same and add it or if its different
+          // dont craft it
+
+          //currently this does not consume our items in the crafting inventory bit
+          // so we can count how many items we need to craft something and go through 
+          // the inventory and consume them like that instead of trying to figure out the recipe type thing
+          // I also don't think the recipe type thing would work cause we want to use crafting recipes
+        }
+
+        items.set(0, itemStack);
+      }
+
+      delay = 4;
+    }
+
+    if (delay < 4) {
+      delay -= 1;
+    }
+
+    if (world.isReceivingRedstonePower(pos) && delay == 4 && !activated) {
+      delay -= 1;
+      activated = true;
+    }
+
+    if (!world.isReceivingRedstonePower(pos) && delay == 4) {
+      activated = false;
+    }
   }
 
   @Override
