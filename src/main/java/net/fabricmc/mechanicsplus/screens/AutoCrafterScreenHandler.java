@@ -1,11 +1,11 @@
 package net.fabricmc.mechanicsplus.screens;
 
-import java.io.ObjectOutputStream.PutField;
 import java.util.Optional;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.mechanicsplus.MechanicsPlusMod;
+import net.fabricmc.mechanicsplus.helpers.BlockedCraftingResultSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
@@ -35,6 +35,8 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
   private final ScreenHandlerContext context;
   private final PlayerEntity player;
 
+  private boolean doUpdate;
+
   public AutoCrafterScreenHandler(int syncId, PlayerInventory playerInventory) {
     this(syncId, playerInventory, new SimpleInventory(37), ScreenHandlerContext.EMPTY);
   }
@@ -52,15 +54,20 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
     this.input = new CraftingInventory(this, 3, 3);
     this.result = new CraftingResultInventory();
 
-    //set recipe
-    for (int i = 1; i < 10; i++)
-      this.input.setStack(i - 1, this.inventory.getStack(i));
+    //set recipe this feels a little janky but every time we set the stack the whole thing was being overwritten in updateResult
+    //so we wait until we add the last block to do the update
+    doUpdate = false;
+    for (int i = 1; i < 10; i++) {
+      if (i == 9)
+        doUpdate = true;
+      this.input.setStack(i - 1, this.inventory.getStack(i).copy());
+    }
 
-    //We shouldn't hide the output hole cause hiding info is bad
-    //this.result.setStack(0, this.inventory.getStack(0));
+    // recipe result slot
+    this.addSlot(new BlockedCraftingResultSlot(playerInventory.player, this.input, this.result, 0, 110, 35));
 
-    // output slot
-    this.addSlot(new CraftingResultSlot(playerInventory.player, this.input, this.result, 0, 124, 35));
+    //output slot
+    this.addSlot(new Slot(this.inventory, 0, 142, 35));
 
     int m;
     int l;
@@ -68,7 +75,7 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
     // craft table
     for (m = 0; m < 3; ++m) {
       for (l = 0; l < 3; ++l) {
-        this.addSlot(new Slot(this.input, l + m * 3, 30 + l * 18, 18 + m * 18));
+        this.addSlot(new Slot(this.input, l + m * 3, 16 + l * 18, 18 + m * 18));
       }
     }
 
@@ -94,7 +101,7 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
 
   //this is where the update happens and the item gets crafted
   protected static void updateResult(int syncId, World world, PlayerEntity player, CraftingInventory craftingInventory,
-      CraftingResultInventory resultInventory) {
+      CraftingResultInventory resultInventory, Inventory baseInventory) {
     if (!world.isClient) {
       ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) player;
       ItemStack itemStack = ItemStack.EMPTY;
@@ -109,12 +116,22 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
 
       resultInventory.setStack(0, itemStack);
       serverPlayerEntity.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(syncId, 0, itemStack));
+
     }
+    
+    //update base inventory
+    for (int i = 0; i < 9; i++) {
+      System.out.println((i + 1) + " " + i + ": " + baseInventory.getStack(i).getItem().getTranslationKey());
+      baseInventory.setStack(i + 1, craftingInventory.getStack(i).copy());
+    }
+    baseInventory.markDirty();
   }
 
   public void onContentChanged(Inventory inventory) {
+    if (!doUpdate)
+      return;
     this.context.run((world, blockPos) -> {
-      updateResult(this.syncId, world, this.player, this.input, this.result);//we probably want to pass in the base inventory
+      updateResult(this.syncId, world, this.player, this.input, this.result, this.inventory);
     });
   }
 

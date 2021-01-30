@@ -132,10 +132,8 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
 
   @Override
   public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-    //only extract from the output if the item is greater than one
     if (dir == Direction.DOWN && slot == 0) {
-      int outputSize = stack.getCount();
-      return outputSize > 1;
+      return true;
     }
     return false;
   }
