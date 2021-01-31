@@ -19,6 +19,7 @@ public class MechanicsPlusMod implements ModInitializer {
 
   public static final Identifier BREAKER = new Identifier("mechanicsplus", "breaker_block");
   public static final Identifier AUTOCRAFTER = new Identifier("mechanicsplus", "autocrafter_block");
+  public static final Identifier PLACER = new Identifier("mechanicsplus", "placer_block");
 
   public static final BreakerBlock BREAKER_BLOCK;
   public static final BlockItem BREAKER_BLOCK_ITEM;
@@ -29,6 +30,11 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final BlockItem AUTOCRAFTER_BLOCK_ITEM;
   public static final BlockEntityType<AutoCrafterBlockEntity> AUTOCRAFTER_BLOCK_ENTITY;
   public static final ScreenHandlerType<AutoCrafterScreenHandler> AUTOCRAFTER_SCREEN_HANDLER;
+
+  public static final PlacerBlock PLACER_BLOCK;
+  public static final BlockItem PLACER_BLOCK_ITEM;
+  public static final BlockEntityType<PlacerBlockEntity> PLACER_BLOCK_ENTITY;
+  public static final ScreenHandlerType<PlacerScreenHandler> PLACER_SCREEN_HANDLER;
 
   static {
     BREAKER_BLOCK = Registry.register(Registry.BLOCK, BREAKER,
@@ -46,6 +52,14 @@ public class MechanicsPlusMod implements ModInitializer {
     AUTOCRAFTER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, AUTOCRAFTER,
         BlockEntityType.Builder.create(AutoCrafterBlockEntity::new, AUTOCRAFTER_BLOCK).build(null));
     AUTOCRAFTER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(AUTOCRAFTER, AutoCrafterScreenHandler::new);
+
+    PLACER_BLOCK = Registry.register(Registry.BLOCK, PLACER,
+        new PlacerBlock(FabricBlockSettings.copyOf(Blocks.DISPENSER)));
+    PLACER_BLOCK_ITEM = Registry.register(Registry.ITEM, PLACER,
+        new BlockItem(PLACER_BLOCK, new Item.Settings().group(ItemGroup.REDSTONE)));
+    PLACER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, PLACER,
+        BlockEntityType.Builder.create(PlacerBlockEntity::new, PLACER_BLOCK).build(null));
+    PLACER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(PLACER, PlacerScreenHandler::new);
   }
 
   @Override
