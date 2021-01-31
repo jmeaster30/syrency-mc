@@ -13,13 +13,17 @@ public class EntityCraftingInventory extends CraftingInventory {
 
   private final DefaultedList<ItemStack> stacks;
   private final int width;
-   private final int height;
+  private final int height;
   
   public EntityCraftingInventory(int width, int height) {
     super(null, width, height);
     this.stacks = DefaultedList.ofSize(width * height, ItemStack.EMPTY);
     this.width = width;
     this.height = height;
+  }
+
+  public DefaultedList<ItemStack> getStacks() {
+    return stacks;
   }
 
   public ItemStack removeStack(int slot, int amount) {
@@ -75,8 +79,8 @@ public class EntityCraftingInventory extends CraftingInventory {
   public void provideRecipeInputs(RecipeFinder finder) {
     Iterator<ItemStack> var2 = this.stacks.iterator();
 
-    while(var2.hasNext()) {
-      ItemStack itemStack = (ItemStack)var2.next();
+    while (var2.hasNext()) {
+      ItemStack itemStack = (ItemStack) var2.next();
       finder.addNormalItem(itemStack);
     }
   }

@@ -120,7 +120,6 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
     
     //update base inventory
     for (int i = 0; i < 9; i++) {
-      System.out.println((i + 1) + " " + i + ": " + baseInventory.getStack(i).getItem().getTranslationKey());
       baseInventory.setStack(i + 1, craftingInventory.getStack(i).copy());
     }
     baseInventory.markDirty();

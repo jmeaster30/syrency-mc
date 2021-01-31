@@ -79,6 +79,73 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
     return new TranslatableText(getCachedState().getBlock().getTranslationKey());
   }
 
+  private DefaultedList<ItemStack> combineItemStacks(DefaultedList<ItemStack> stacks) {
+    DefaultedList<ItemStack> combined = DefaultedList.ofSize(stacks.size(), ItemStack.EMPTY);
+
+    for (int i = 0; i < stacks.size(); i++) {
+      ItemStack s = stacks.get(i).copy();
+
+      for (int j = 0; j < combined.size(); j++) {
+        ItemStack c = combined.get(j);
+
+        if (c.equals(ItemStack.EMPTY)) {
+          combined.set(j, s);
+          break;
+        } else if (c.getItem().equals(s.getItem())) {
+          if (c.getCount() + s.getCount() <= c.getMaxCount()) {
+            c.setCount(c.getCount() + s.getCount());
+            break;
+          } else {
+            c.setCount(c.getMaxCount());
+            s.setCount(c.getCount() + s.getCount() - c.getMaxCount());
+          }
+        }
+      }
+    }
+
+    return combined;
+  }
+
+  private boolean contains(DefaultedList<ItemStack> list, DefaultedList<ItemStack> toFind) {
+    for (ItemStack find : toFind) {
+      if(find.getItem().equals(ItemStack.EMPTY.getItem()))
+        continue;
+
+      int idx = -1;
+      for (int i = 0; i < list.size(); i++) {
+        if (list.get(i).getItem().equals(find.getItem())) {
+          idx = i;
+          break;
+        }
+      }
+
+      if (idx == -1) {
+        return false;
+      }
+
+      ItemStack found = list.get(idx);
+      if (found.getCount() < find.getCount()){
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private DefaultedList<ItemStack> getNeeded(DefaultedList<ItemStack> stacks) {
+    DefaultedList<ItemStack> remaining = DefaultedList.ofSize(stacks.size(), ItemStack.EMPTY);
+
+    for (int i = 0; i < remaining.size(); i++) {
+      ItemStack r = stacks.get(i).copy();
+      if(r.getCount() > 0)
+        r.setCount(1);
+      
+      remaining.set(i, r);
+    }
+
+    return remaining;
+  }
+
   @Override
   public void tick() {
 
@@ -89,24 +156,52 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
         for(int i = 1; i < 10; i++)
           craftingInventory.setStack(i - 1, items.get(i));
 
-        ItemStack itemStack = ItemStack.EMPTY;
         Optional<CraftingRecipe> optional = world.getServer().getRecipeManager().getFirstMatch(RecipeType.CRAFTING,
             craftingInventory, world);
         if (optional.isPresent()) {
           CraftingRecipe recipe = optional.get();
-          itemStack = recipe.craft(craftingInventory);
-          
-          //also we currently replace the item in the output
-          // but we should check if it is the same and add it or if its different
-          // dont craft it
+          ItemStack crafted = recipe.craft(craftingInventory);
 
-          //currently this does not consume our items in the crafting inventory bit
-          // so we can count how many items we need to craft something and go through 
-          // the inventory and consume them like that instead of trying to figure out the recipe type thing
-          // I also don't think the recipe type thing would work cause we want to use crafting recipes
+          if ((crafted.getItem().equals(items.get(0).getItem())
+              && crafted.getCount() + items.get(0).getCount() <= items.get(0).getMaxCount())
+              || items.get(0).getItem().equals(ItemStack.EMPTY.getItem())) {
+      
+            DefaultedList<ItemStack> neededRecipeStacks = combineItemStacks(getNeeded(craftingInventory.getStacks()));
+
+            DefaultedList<ItemStack> baseInventory = DefaultedList.ofSize(items.size() - 10, ItemStack.EMPTY);
+            for (int i = 0; i < baseInventory.size(); i++) {
+              baseInventory.set(i, items.get(i + 10));
+            }
+
+            if (!contains(combineItemStacks(baseInventory), neededRecipeStacks)) {
+              delay = 4;
+              return;
+            }
+
+            for (ItemStack needed : neededRecipeStacks) {
+              for(int j = 10; j < items.size(); j++) {
+                ItemStack stack = items.get(j);
+
+                if (stack.getItem().equals(needed.getItem())) {
+                  if (needed.getCount() <= stack.getCount()) {
+                    stack.setCount(stack.getCount() - needed.getCount());
+                    needed.setCount(0);
+                    break;
+                  } else {
+                    needed.setCount(needed.getCount() - stack.getCount());
+                    stack.setCount(0);
+                  }
+                }
+              }
+            }
+
+            if (items.get(0).equals(ItemStack.EMPTY)) {
+              items.set(0, crafted);
+            } else {
+              items.get(0).setCount(crafted.getCount() + items.get(0).getCount());
+            }
+          }
         }
-
-        items.set(0, itemStack);
       }
 
       delay = 4;
@@ -138,7 +233,6 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
 
   @Override
   public ItemStack getStack(int slot) {
-    // System.out.println("GET STACK :) " + slot);
     return items.get(slot);
   }
 
@@ -155,13 +249,11 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
 
   @Override
   public ItemStack removeStack(int slot) {
-    // System.out.println("REMOVE STACK :) " + slot);
     return Inventories.removeStack(items, slot);
   }
 
   @Override
   public ItemStack removeStack(int slot, int count) {
-    // System.out.println("REMOVE STACK :) " + slot + " : " + count);
     ItemStack result = Inventories.splitStack(items, slot, count);
     if (!result.isEmpty()) {
       markDirty();
@@ -171,7 +263,6 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
 
   @Override
   public void setStack(int slot, ItemStack stack) {
-    System.out.println("SET STACK :O " + slot);
     items.set(slot, stack);
     if (stack.getCount() > getMaxCountPerStack()) {
       stack.setCount(getMaxCountPerStack());
