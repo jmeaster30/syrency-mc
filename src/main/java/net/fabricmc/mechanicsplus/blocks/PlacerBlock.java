@@ -14,7 +14,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
@@ -70,12 +69,12 @@ public class PlacerBlock extends FacingBlock implements BlockEntityProvider {
   public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
       BlockHitResult hit) {
     if (!world.isClient) {
-      player.sendMessage(new LiteralText("You used this block!!"), false);
+      //player.sendMessage(new LiteralText("You used this block!!"), false);
 
       NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
 
       if (screenHandlerFactory != null) {
-        player.sendMessage(new LiteralText("Opened screen"), false);
+        //player.sendMessage(new LiteralText("Opened screen"), false);
         player.openHandledScreen(screenHandlerFactory);
       }
     }

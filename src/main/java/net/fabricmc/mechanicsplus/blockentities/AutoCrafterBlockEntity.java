@@ -106,29 +106,48 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
     return combined;
   }
 
-  private boolean contains(DefaultedList<ItemStack> list, DefaultedList<ItemStack> toFind) {
-    for (ItemStack find : toFind) {
-      if(find.getItem().equals(ItemStack.EMPTY.getItem()))
+  private boolean contains(DefaultedList<ItemStack> toFind) {
+    DefaultedList<ItemStack> temp = DefaultedList.ofSize(toFind.size(), ItemStack.EMPTY);
+    for (int j = 0; j < toFind.size(); j++) {
+      temp.set(j, toFind.get(j).copy());
+    }
+
+    for (int i = 10; i < items.size(); i++) {
+      ItemStack inventoryStack = items.get(i);
+
+      if (inventoryStack.getItem().equals(ItemStack.EMPTY.getItem()))
         continue;
 
-      int idx = -1;
-      for (int i = 0; i < list.size(); i++) {
-        if (list.get(i).getItem().equals(find.getItem())) {
-          idx = i;
+      int emptySlots = 0;
+      for (int j = 0; j < temp.size(); j++) {
+        ItemStack findStack = temp.get(j);
+
+        if (findStack.getItem().equals(ItemStack.EMPTY.getItem())) {
+          emptySlots += 1;
+          continue;
+        }
+
+        if (inventoryStack.getItem().equals(findStack.getItem())) {
+          if (inventoryStack.getCount() < findStack.getCount()) {
+            findStack.setCount(findStack.getCount() - inventoryStack.getCount());
+          } else {
+            temp.set(j, ItemStack.EMPTY);
+          }
           break;
         }
       }
 
-      if (idx == -1) {
-        return false;
-      }
-
-      ItemStack found = list.get(idx);
-      if (found.getCount() < find.getCount()){
-        return false;
+      if (emptySlots == temp.size()) {
+        break;
       }
     }
 
+    for (ItemStack findStack : temp) {
+      if (!findStack.getItem().equals(ItemStack.EMPTY.getItem())) {
+        return false;
+      }
+    }
+    
     return true;
   }
 
@@ -168,12 +187,7 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
       
             DefaultedList<ItemStack> neededRecipeStacks = combineItemStacks(getNeeded(craftingInventory.getStacks()));
 
-            DefaultedList<ItemStack> baseInventory = DefaultedList.ofSize(items.size() - 10, ItemStack.EMPTY);
-            for (int i = 0; i < baseInventory.size(); i++) {
-              baseInventory.set(i, items.get(i + 10));
-            }
-
-            if (!contains(combineItemStacks(baseInventory), neededRecipeStacks)) {
+            if (!contains(neededRecipeStacks)) {
               delay = 4;
               return;
             }
