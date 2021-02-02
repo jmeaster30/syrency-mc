@@ -11,7 +11,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
@@ -20,7 +19,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -28,7 +26,6 @@ import net.minecraft.util.Tickable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 
 public class PlacerBlockEntity extends BlockEntity
     implements ImplementedInventory, NamedScreenHandlerFactory, Tickable {
@@ -106,18 +103,23 @@ public class PlacerBlockEntity extends BlockEntity
       Direction facing = thisState.get(Properties.FACING);
       BlockPos inFront = pos.add(facing.getVector());
 
-      BlockState placingState = world.getBlockState(inFront);
-      Block placingBlock = placingState.getBlock();
-      BlockEntity placingEntity = placingBlock.hasBlockEntity() ? world.getBlockEntity(inFront) : null;
+      //if there is a block in front of the placer do nothing
+      BlockState frontState = world.getBlockState(inFront);
+      if (!frontState.isAir()) {
+        actionDelay = 4;
+        world.setBlockState(pos, thisState.with(PlacerBlock.ACTIVE, false));
+        return;
+      }
 
       int idx = -1;
-      for(int i = 0; i < items.size(); i++) {
-        if(!items.get(i).getItem().equals(ItemStack.EMPTY.getItem())) {
+      for (int i = 0; i < items.size(); i++) {
+        if (!items.get(i).getItem().equals(ItemStack.EMPTY.getItem())) {
           idx = i;
           break;
         }
       }
 
+      //if the placer is empty do nothing
       if(idx == -1) {
         actionDelay = 4;
         world.setBlockState(pos, thisState.with(PlacerBlock.ACTIVE, false));
@@ -127,9 +129,18 @@ public class PlacerBlockEntity extends BlockEntity
       Item itemToPlace = items.get(idx).getItem();
 
       Block newBlock = Block.getBlockFromItem(itemToPlace);
-      BlockState newBlockState = newBlock.getDefaultState();
+      if (newBlock.is(Blocks.AIR)) {
+        ItemStack toDrop = new ItemStack(itemToPlace, 1);
+        Block.dropStack(world, inFront, toDrop);
+      } else {
+        BlockState newBlockState = newBlock.getDefaultState();
+        Block.replace(frontState, newBlockState, world, inFront, -33); // the -33 makes the block show up
+      }
 
-      Block.replace(placingState, newBlockState, world, inFront, 0);
+      items.get(idx).setCount(items.get(idx).getCount() - 1);
+      if (items.get(idx).getCount() == 0) {
+        items.set(idx, ItemStack.EMPTY);
+      }
 
       actionDelay = 4;
       world.setBlockState(pos, thisState.with(PlacerBlock.ACTIVE, false));
