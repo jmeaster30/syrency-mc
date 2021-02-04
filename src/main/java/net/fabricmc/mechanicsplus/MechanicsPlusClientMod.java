@@ -13,5 +13,6 @@ public class MechanicsPlusClientMod implements ClientModInitializer {
     ScreenRegistry.register(MechanicsPlusMod.BREAKER_SCREEN_HANDLER, BreakerScreen::new);
     ScreenRegistry.register(MechanicsPlusMod.AUTOCRAFTER_SCREEN_HANDLER, AutoCrafterScreen::new);
     ScreenRegistry.register(MechanicsPlusMod.PLACER_SCREEN_HANDLER, PlacerScreen::new);
+    ScreenRegistry.register(MechanicsPlusMod.FAST_HOPPER_SCREEN_HANDLER, FastHopperScreen::new);
   }
 }

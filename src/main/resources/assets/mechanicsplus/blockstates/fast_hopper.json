@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "mechanicsplus:block/fast_hopper"
+    },
+    "facing=east": {
+      "model": "mechanicsplus:block/fast_hopper_side",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "mechanicsplus:block/fast_hopper_side"
+    },
+    "facing=south": {
+      "model": "mechanicsplus:block/fast_hopper_side",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "mechanicsplus:block/fast_hopper_side",
+      "y": 270
+    }
+  }
+}

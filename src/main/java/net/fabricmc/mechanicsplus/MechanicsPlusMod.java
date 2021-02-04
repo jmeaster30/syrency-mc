@@ -11,6 +11,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.screen.HopperScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -20,6 +21,7 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final Identifier BREAKER = new Identifier("mechanicsplus", "breaker_block");
   public static final Identifier AUTOCRAFTER = new Identifier("mechanicsplus", "autocrafter_block");
   public static final Identifier PLACER = new Identifier("mechanicsplus", "placer_block");
+  public static final Identifier FASTHOPPER = new Identifier("mechanicsplus", "fast_hopper");
 
   public static final BreakerBlock BREAKER_BLOCK;
   public static final BlockItem BREAKER_BLOCK_ITEM;
@@ -35,6 +37,11 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final BlockItem PLACER_BLOCK_ITEM;
   public static final BlockEntityType<PlacerBlockEntity> PLACER_BLOCK_ENTITY;
   public static final ScreenHandlerType<PlacerScreenHandler> PLACER_SCREEN_HANDLER;
+
+  public static final FastHopperBlock FAST_HOPPER;
+  public static final BlockItem FAST_HOPPER_ITEM;
+  public static final BlockEntityType<FastHopperBlockEntity> FAST_HOPPER_ENTITY;
+  public static final ScreenHandlerType<HopperScreenHandler> FAST_HOPPER_SCREEN_HANDLER;
 
   static {
     BREAKER_BLOCK = Registry.register(Registry.BLOCK, BREAKER,
@@ -60,6 +67,14 @@ public class MechanicsPlusMod implements ModInitializer {
     PLACER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, PLACER,
         BlockEntityType.Builder.create(PlacerBlockEntity::new, PLACER_BLOCK).build(null));
     PLACER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(PLACER, PlacerScreenHandler::new);
+
+    FAST_HOPPER = Registry.register(Registry.BLOCK, FASTHOPPER,
+        new FastHopperBlock(FabricBlockSettings.copyOf(Blocks.HOPPER)));
+    FAST_HOPPER_ITEM = Registry.register(Registry.ITEM, FASTHOPPER,
+        new BlockItem(FAST_HOPPER, new Item.Settings().group(ItemGroup.REDSTONE)));
+    FAST_HOPPER_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, FASTHOPPER,
+        BlockEntityType.Builder.create(FastHopperBlockEntity::new, FAST_HOPPER).build(null));
+    FAST_HOPPER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(FASTHOPPER, FastHopperScreenHandler::new);
   }
 
   @Override
