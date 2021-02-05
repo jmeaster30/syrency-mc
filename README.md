@@ -22,3 +22,6 @@ Hopper/block that takes in stuff from top then divides set items out the sides a
 
 ## Filter (Not Implemented)
 Hopper that only takes in stuff that matches the filter. can filter up to 5 items at a time if there are no item it doesn't take anything
+
+## Growth Detector (Not Implemented)
+Observer type block that outputs a redstone signal power equal to how much the plant has grown
