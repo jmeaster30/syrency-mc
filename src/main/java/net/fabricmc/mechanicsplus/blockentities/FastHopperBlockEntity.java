@@ -48,29 +48,29 @@ public class FastHopperBlockEntity extends LootableContainerBlockEntity implemen
   private static final int ItemTransferSize = 4;
 
   public FastHopperBlockEntity() {
-     super(MechanicsPlusMod.FAST_HOPPER_ENTITY);
-     this.inventory = DefaultedList.ofSize(5, ItemStack.EMPTY);
-     this.transferCooldown = -1;
+    super(MechanicsPlusMod.FAST_HOPPER_ENTITY);
+    this.inventory = DefaultedList.ofSize(5, ItemStack.EMPTY);
+    this.transferCooldown = -1;
   }
 
   public void fromTag(BlockState state, CompoundTag tag) {
-     super.fromTag(state, tag);
-     this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
-     if (!this.deserializeLootTable(tag)) {
-        Inventories.fromTag(tag, this.inventory);
-     }
+    super.fromTag(state, tag);
+    this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
+    if (!this.deserializeLootTable(tag)) {
+      Inventories.fromTag(tag, this.inventory);
+    }
 
-     this.transferCooldown = tag.getInt("TransferCooldown");
+    this.transferCooldown = tag.getInt("TransferCooldown");
   }
 
   public CompoundTag toTag(CompoundTag tag) {
-     super.toTag(tag);
-     if (!this.serializeLootTable(tag)) {
-        Inventories.toTag(tag, this.inventory);
-     }
+    super.toTag(tag);
+    if (!this.serializeLootTable(tag)) {
+      Inventories.toTag(tag, this.inventory);
+    }
 
-     tag.putInt("TransferCooldown", this.transferCooldown);
-     return tag;
+    tag.putInt("TransferCooldown", this.transferCooldown);
+    return tag;
   }
 
   @Override
@@ -81,141 +81,139 @@ public class FastHopperBlockEntity extends LootableContainerBlockEntity implemen
   public ItemStack removeStack(int slot, int amount) {
     this.checkLootInteraction((PlayerEntity)null);
     return Inventories.splitStack(this.getInvStackList(), slot, amount);
- }
+  }
 
- public void setStack(int slot, ItemStack stack) {
+  public void setStack(int slot, ItemStack stack) {
     this.checkLootInteraction((PlayerEntity)null);
     this.getInvStackList().set(slot, stack);
     if (stack.getCount() > this.getMaxCountPerStack()) {
-       stack.setCount(this.getMaxCountPerStack());
+      stack.setCount(this.getMaxCountPerStack());
     }
+  }
 
- }
+  protected Text getContainerName() {
+    return new TranslatableText(getCachedState().getBlock().getTranslationKey());
+  }
 
- protected Text getContainerName() {
-    return new TranslatableText("container.hopper");
- }
-
- public void tick() {
+  public void tick() {
     if (this.world != null && !this.world.isClient) {
-       --this.transferCooldown;
-       this.lastTickTime = this.world.getTime();
-       if (!this.needsCooldown()) {
-          this.setCooldown(0);
-          this.insertAndExtract(() -> {
-             return extract(this);
-          });
-       }
-
+      --this.transferCooldown;
+      this.lastTickTime = this.world.getTime();
+      if (!this.needsCooldown()) {
+        this.setCooldown(0);
+        this.insertAndExtract(() -> {
+          return extract(this);
+        });
+      }
     }
- }
+  }
 
- private boolean insertAndExtract(Supplier<Boolean> extractMethod) {
+  private boolean insertAndExtract(Supplier<Boolean> extractMethod) {
     if (this.world != null && !this.world.isClient) {
-       if (!this.needsCooldown() && (Boolean)this.getCachedState().get(FastHopperBlock.ENABLED)) {
-          boolean bl = false;
-          if (!this.isEmpty()) {
-             bl = this.insert();
-          }
+      if (!this.needsCooldown() && (Boolean)this.getCachedState().get(FastHopperBlock.ENABLED)) {
+        boolean bl = false;
+        if (!this.isEmpty()) {
+          bl = this.insert();
+        }
 
-          if (!this.isFull()) {
-             bl |= (Boolean)extractMethod.get();
-          }
+        if (!this.isFull()) {
+          bl |= (Boolean)extractMethod.get();
+        }
 
-          if (bl) {
-             this.setCooldown(8);
-             this.markDirty();
-             return true;
-          }
-       }
+        if (bl) {
+          this.setCooldown(8);
+          this.markDirty();
+          return true;
+        }
+      }
 
-       return false;
+      return false;
     } else {
-       return false;
+      return false;
     }
- }
+  }
 
- private boolean isFull() {
+  private boolean isFull() {
     Iterator<ItemStack> var1 = this.inventory.iterator();
 
     ItemStack itemStack;
     do {
-       if (!var1.hasNext()) {
-          return true;
-       }
+      if (!var1.hasNext()) {
+        return true;
+      }
 
-       itemStack = (ItemStack)var1.next();
+      itemStack = (ItemStack)var1.next();
     } while(!itemStack.isEmpty() && itemStack.getCount() == itemStack.getMaxCount());
 
     return false;
- }
+  }
 
- private boolean insert() {
+  private boolean insert() {
     Inventory inventory = this.getOutputInventory();
     if (inventory == null) {
-       return false;
+      return false;
     } else {
-       Direction direction = ((Direction)this.getCachedState().get(FastHopperBlock.FACING)).getOpposite();
-       if (this.isInventoryFull(inventory, direction)) {
-          return false;
-       } else {
-          for(int i = 0; i < this.size(); ++i) {
-             if (!this.getStack(i).isEmpty()) {
-                ItemStack itemStack = this.getStack(i).copy();
-                ItemStack itemStack2 = transfer(this, inventory, this.removeStack(i, ItemTransferSize), direction);
-                if (itemStack2.isEmpty()) {
-                   inventory.markDirty();
-                   return true;
-                }
+      Direction direction = ((Direction)this.getCachedState().get(FastHopperBlock.FACING)).getOpposite();
+      if (this.isInventoryFull(inventory, direction)) {
+        return false;
+      } else {
+        for(int i = 0; i < this.size(); ++i) {
+          if (!this.getStack(i).isEmpty()) {
+            ItemStack itemStack = this.getStack(i).copy();
+            ItemStack itemStack2 = transfer(this, inventory, this.removeStack(i, ItemTransferSize), direction);
+            if (itemStack2.isEmpty()) {
+              inventory.markDirty();
+              return true;
+            }
 
-                this.setStack(i, itemStack);
-             }
+            this.setStack(i, itemStack);
           }
+        }
 
-          return false;
-       }
+        return false;
+      }
     }
- }
+  }
 
- private static IntStream getAvailableSlots(Inventory inventory, Direction side) {
+  private static IntStream getAvailableSlots(Inventory inventory, Direction side) {
     return inventory instanceof SidedInventory ? IntStream.of(((SidedInventory)inventory).getAvailableSlots(side)) : IntStream.range(0, inventory.size());
- }
+  }
 
- private boolean isInventoryFull(Inventory inv, Direction direction) {
+  private boolean isInventoryFull(Inventory inv, Direction direction) {
     return getAvailableSlots(inv, direction).allMatch((i) -> {
-       ItemStack itemStack = inv.getStack(i);
-       return itemStack.getCount() >= itemStack.getMaxCount();
+      ItemStack itemStack = inv.getStack(i);
+      return itemStack.getCount() >= itemStack.getMaxCount();
     });
- }
+  }
 
- private static boolean isInventoryEmpty(Inventory inv, Direction facing) {
+  private static boolean isInventoryEmpty(Inventory inv, Direction facing) {
     return getAvailableSlots(inv, facing).allMatch((i) -> {
-       return inv.getStack(i).isEmpty();
+      return inv.getStack(i).isEmpty();
     });
- }
+  }
 
   public static boolean extract(Hopper hopper) {
     Inventory inventory = getInputInventory(hopper);
     if (inventory != null) {
-       Direction direction = Direction.DOWN;
-       return isInventoryEmpty(inventory, direction) ? false : getAvailableSlots(inventory, direction).anyMatch((i) -> {
-          return extract(hopper, inventory, i, direction);
-       });
+      Direction direction = Direction.DOWN;
+      return isInventoryEmpty(inventory, direction) ? false : getAvailableSlots(inventory, direction).anyMatch((i) -> {
+        return extract(hopper, inventory, i, direction);
+      });
     } else {
-       Iterator<ItemEntity> var2 = getInputItemEntities(hopper).iterator();
+      Iterator<ItemEntity> var2 = getInputItemEntities(hopper).iterator();
 
-       ItemEntity itemEntity;
-       do {
-          if (!var2.hasNext()) {
-             return false;
-          }
+      ItemEntity itemEntity;
+      do {
+        if (!var2.hasNext()) {
+          return false;
+        }
 
-          itemEntity = (ItemEntity)var2.next();
-       } while(!extract(hopper, itemEntity));
+        itemEntity = (ItemEntity)var2.next();
+      } while(!extract(hopper, itemEntity));
 
-       return true;
+      return true;
     }
- }
+  }
 
   private static boolean extract(Hopper hopper, Inventory inventory, int slot, Direction side) {
     ItemStack itemStack = inventory.getStack(slot);

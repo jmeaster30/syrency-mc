@@ -8,7 +8,6 @@ import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.Hopper;
-import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
@@ -104,13 +103,12 @@ public class FastHopperBlock extends BlockWithEntity {
   }
 
   public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-     if (itemStack.hasCustomName()) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof HopperBlockEntity) {
-           ((HopperBlockEntity)blockEntity).setCustomName(itemStack.getName());
-        }
-     }
-
+    if (itemStack.hasCustomName()) {
+      BlockEntity blockEntity = world.getBlockEntity(pos);
+      if (blockEntity instanceof FastHopperBlockEntity) {
+        ((FastHopperBlockEntity)blockEntity).setCustomName(itemStack.getName());
+      }
+    }
   }
 
   public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
@@ -120,61 +118,60 @@ public class FastHopperBlock extends BlockWithEntity {
   }
 
   public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-     if (world.isClient) {
-        return ActionResult.SUCCESS;
-     } else {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof HopperBlockEntity) {
-           player.openHandledScreen((HopperBlockEntity)blockEntity);
-           player.incrementStat(Stats.INSPECT_HOPPER);
-        }
+    if (world.isClient) {
+      return ActionResult.SUCCESS;
+    } else {
+      BlockEntity blockEntity = world.getBlockEntity(pos);
+      if (blockEntity instanceof FastHopperBlockEntity) {
+        player.openHandledScreen((FastHopperBlockEntity)blockEntity);
+        player.incrementStat(Stats.INSPECT_HOPPER);
+      }
 
-        return ActionResult.CONSUME;
-     }
+      return ActionResult.CONSUME;
+    }
   }
 
   public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-     this.updateEnabled(world, pos, state);
+    this.updateEnabled(world, pos, state);
   }
 
   private void updateEnabled(World world, BlockPos pos, BlockState state) {
-     boolean bl = !world.isReceivingRedstonePower(pos);
-     if (bl != (Boolean)state.get(ENABLED)) {
-        world.setBlockState(pos, (BlockState)state.with(ENABLED, bl), 4);
-     }
-
+    boolean bl = !world.isReceivingRedstonePower(pos);
+    if (bl != (Boolean)state.get(ENABLED)) {
+      world.setBlockState(pos, (BlockState)state.with(ENABLED, bl), 4);
+    }
   }
 
   public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-     if (!state.isOf(newState.getBlock())) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof HopperBlockEntity) {
-           ItemScatterer.spawn(world, pos, (HopperBlockEntity)blockEntity);
-           world.updateComparators(pos, this);
-        }
+    if (!state.isOf(newState.getBlock())) {
+      BlockEntity blockEntity = world.getBlockEntity(pos);
+      if (blockEntity instanceof FastHopperBlockEntity) {
+        ItemScatterer.spawn(world, pos, (FastHopperBlockEntity)blockEntity);
+        world.updateComparators(pos, this);
+      }
 
-        super.onStateReplaced(state, world, pos, newState, moved);
-     }
+      super.onStateReplaced(state, world, pos, newState, moved);
+    }
   }
 
   public BlockRenderType getRenderType(BlockState state) {
-     return BlockRenderType.MODEL;
+    return BlockRenderType.MODEL;
   }
 
   public boolean hasComparatorOutput(BlockState state) {
-     return true;
+    return true;
   }
 
   public int getComparatorOutput(BlockState state, World world, BlockPos pos) {
-     return ScreenHandler.calculateComparatorOutput(world.getBlockEntity(pos));
+    return ScreenHandler.calculateComparatorOutput(world.getBlockEntity(pos));
   }
 
   public BlockState rotate(BlockState state, BlockRotation rotation) {
-     return (BlockState)state.with(FACING, rotation.rotate((Direction)state.get(FACING)));
+    return (BlockState)state.with(FACING, rotation.rotate((Direction)state.get(FACING)));
   }
 
   public BlockState mirror(BlockState state, BlockMirror mirror) {
-     return state.rotate(mirror.getRotation((Direction)state.get(FACING)));
+    return state.rotate(mirror.getRotation((Direction)state.get(FACING)));
   }
 
   protected void appendProperties(Builder<Block, BlockState> builder) {
@@ -182,11 +179,10 @@ public class FastHopperBlock extends BlockWithEntity {
   }
 
   public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-     BlockEntity blockEntity = world.getBlockEntity(pos);
-     if (blockEntity instanceof HopperBlockEntity) {
-        ((HopperBlockEntity)blockEntity).onEntityCollided(entity);
-     }
-
+    BlockEntity blockEntity = world.getBlockEntity(pos);
+    if (blockEntity instanceof FastHopperBlockEntity) {
+      ((FastHopperBlockEntity)blockEntity).onEntityCollided(entity);
+    }
   }
 
   public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
@@ -194,21 +190,21 @@ public class FastHopperBlock extends BlockWithEntity {
   }
 
   static {
-     FACING = Properties.HOPPER_FACING;
-     ENABLED = Properties.ENABLED;
-     TOP_SHAPE = Block.createCuboidShape(0.0D, 10.0D, 0.0D, 16.0D, 16.0D, 16.0D);
-     MIDDLE_SHAPE = Block.createCuboidShape(4.0D, 4.0D, 4.0D, 12.0D, 10.0D, 12.0D);
-     OUTSIDE_SHAPE = VoxelShapes.union(MIDDLE_SHAPE, TOP_SHAPE);
-     DEFAULT_SHAPE = VoxelShapes.combineAndSimplify(OUTSIDE_SHAPE, Hopper.INSIDE_SHAPE, BooleanBiFunction.ONLY_FIRST);
-     DOWN_SHAPE = VoxelShapes.union(DEFAULT_SHAPE, Block.createCuboidShape(6.0D, 0.0D, 6.0D, 10.0D, 4.0D, 10.0D));
-     EAST_SHAPE = VoxelShapes.union(DEFAULT_SHAPE, Block.createCuboidShape(12.0D, 4.0D, 6.0D, 16.0D, 8.0D, 10.0D));
-     NORTH_SHAPE = VoxelShapes.union(DEFAULT_SHAPE, Block.createCuboidShape(6.0D, 4.0D, 0.0D, 10.0D, 8.0D, 4.0D));
-     SOUTH_SHAPE = VoxelShapes.union(DEFAULT_SHAPE, Block.createCuboidShape(6.0D, 4.0D, 12.0D, 10.0D, 8.0D, 16.0D));
-     WEST_SHAPE = VoxelShapes.union(DEFAULT_SHAPE, Block.createCuboidShape(0.0D, 4.0D, 6.0D, 4.0D, 8.0D, 10.0D));
-     DOWN_RAY_TRACE_SHAPE = Hopper.INSIDE_SHAPE;
-     EAST_RAY_TRACE_SHAPE = VoxelShapes.union(Hopper.INSIDE_SHAPE, Block.createCuboidShape(12.0D, 8.0D, 6.0D, 16.0D, 10.0D, 10.0D));
-     NORTH_RAY_TRACE_SHAPE = VoxelShapes.union(Hopper.INSIDE_SHAPE, Block.createCuboidShape(6.0D, 8.0D, 0.0D, 10.0D, 10.0D, 4.0D));
-     SOUTH_RAY_TRACE_SHAPE = VoxelShapes.union(Hopper.INSIDE_SHAPE, Block.createCuboidShape(6.0D, 8.0D, 12.0D, 10.0D, 10.0D, 16.0D));
-     WEST_RAY_TRACE_SHAPE = VoxelShapes.union(Hopper.INSIDE_SHAPE, Block.createCuboidShape(0.0D, 8.0D, 6.0D, 4.0D, 10.0D, 10.0D));
+    FACING = Properties.HOPPER_FACING;
+    ENABLED = Properties.ENABLED;
+    TOP_SHAPE = Block.createCuboidShape(0.0D, 10.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+    MIDDLE_SHAPE = Block.createCuboidShape(4.0D, 4.0D, 4.0D, 12.0D, 10.0D, 12.0D);
+    OUTSIDE_SHAPE = VoxelShapes.union(MIDDLE_SHAPE, TOP_SHAPE);
+    DEFAULT_SHAPE = VoxelShapes.combineAndSimplify(OUTSIDE_SHAPE, Hopper.INSIDE_SHAPE, BooleanBiFunction.ONLY_FIRST);
+    DOWN_SHAPE = VoxelShapes.union(DEFAULT_SHAPE, Block.createCuboidShape(6.0D, 0.0D, 6.0D, 10.0D, 4.0D, 10.0D));
+    EAST_SHAPE = VoxelShapes.union(DEFAULT_SHAPE, Block.createCuboidShape(12.0D, 4.0D, 6.0D, 16.0D, 8.0D, 10.0D));
+    NORTH_SHAPE = VoxelShapes.union(DEFAULT_SHAPE, Block.createCuboidShape(6.0D, 4.0D, 0.0D, 10.0D, 8.0D, 4.0D));
+    SOUTH_SHAPE = VoxelShapes.union(DEFAULT_SHAPE, Block.createCuboidShape(6.0D, 4.0D, 12.0D, 10.0D, 8.0D, 16.0D));
+    WEST_SHAPE = VoxelShapes.union(DEFAULT_SHAPE, Block.createCuboidShape(0.0D, 4.0D, 6.0D, 4.0D, 8.0D, 10.0D));
+    DOWN_RAY_TRACE_SHAPE = Hopper.INSIDE_SHAPE;
+    EAST_RAY_TRACE_SHAPE = VoxelShapes.union(Hopper.INSIDE_SHAPE, Block.createCuboidShape(12.0D, 8.0D, 6.0D, 16.0D, 10.0D, 10.0D));
+    NORTH_RAY_TRACE_SHAPE = VoxelShapes.union(Hopper.INSIDE_SHAPE, Block.createCuboidShape(6.0D, 8.0D, 0.0D, 10.0D, 10.0D, 4.0D));
+    SOUTH_RAY_TRACE_SHAPE = VoxelShapes.union(Hopper.INSIDE_SHAPE, Block.createCuboidShape(6.0D, 8.0D, 12.0D, 10.0D, 10.0D, 16.0D));
+    WEST_RAY_TRACE_SHAPE = VoxelShapes.union(Hopper.INSIDE_SHAPE, Block.createCuboidShape(0.0D, 8.0D, 6.0D, 4.0D, 10.0D, 10.0D));
   }
 }

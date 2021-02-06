@@ -11,7 +11,6 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.screen.HopperScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -41,7 +40,7 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final FastHopperBlock FAST_HOPPER;
   public static final BlockItem FAST_HOPPER_ITEM;
   public static final BlockEntityType<FastHopperBlockEntity> FAST_HOPPER_ENTITY;
-  public static final ScreenHandlerType<HopperScreenHandler> FAST_HOPPER_SCREEN_HANDLER;
+  public static final ScreenHandlerType<FastHopperScreenHandler> FAST_HOPPER_SCREEN_HANDLER;
 
   static {
     BREAKER_BLOCK = Registry.register(Registry.BLOCK, BREAKER,
