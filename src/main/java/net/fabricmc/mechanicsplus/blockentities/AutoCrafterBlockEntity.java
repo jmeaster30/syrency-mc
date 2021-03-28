@@ -39,9 +39,6 @@ public class AutoCrafterBlockEntity extends BlockEntity implements SidedInventor
   private int delay = 4;
   private boolean activated = false;
   private final DefaultedList<ItemStack> items = DefaultedList.ofSize(37, ItemStack.EMPTY);
-  // 0 : output
-  // 1-9 : crafting table
-  // 10-36 : block inventory
 
   public AutoCrafterBlockEntity() {
     super(MechanicsPlusMod.AUTOCRAFTER_BLOCK_ENTITY);

@@ -16,6 +16,9 @@ If block is placeable on the spot then the block/item gets placed otherwise it g
 ### Fast Hopper
 Hopper that pulls 4 blocks per tick instead of just 1
 
+### Growth Detector (WIP)
+Observer type block that outputs a redstone signal power equal to how much the plant has grown
+
 ## Ideas - 1 (lowest chance) to 5 (highest chance)
 
 ### UpsideDown Hopper (2)
@@ -26,6 +29,3 @@ Hopper/block that takes in stuff from top then divides set items out the sides a
 
 ### Filter (3)
 Hopper that only takes in stuff that matches the filter. can filter up to 5 items at a time if there are no item it doesn't take anything
-
-### Growth Detector (4)
-Observer type block that outputs a redstone signal power equal to how much the plant has grown

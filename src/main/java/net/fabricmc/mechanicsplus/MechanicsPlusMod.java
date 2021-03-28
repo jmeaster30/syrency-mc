@@ -21,6 +21,7 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final Identifier AUTOCRAFTER = new Identifier("mechanicsplus", "autocrafter_block");
   public static final Identifier PLACER = new Identifier("mechanicsplus", "placer_block");
   public static final Identifier FASTHOPPER = new Identifier("mechanicsplus", "fast_hopper");
+  public static final Identifier GROWTHDETECTOR = new Identifier("mechanicsplus", "growth_detector");
 
   public static final BreakerBlock BREAKER_BLOCK;
   public static final BlockItem BREAKER_BLOCK_ITEM;
@@ -41,6 +42,10 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final BlockItem FAST_HOPPER_ITEM;
   public static final BlockEntityType<FastHopperBlockEntity> FAST_HOPPER_ENTITY;
   public static final ScreenHandlerType<FastHopperScreenHandler> FAST_HOPPER_SCREEN_HANDLER;
+
+  public static final GrowthDetectorBlock GROWTH_DETECTOR;
+  public static final BlockItem GROWTH_DETECTOR_ITEM;
+  public static final BlockEntityType<GrowthDetectorBlockEntity> GROWTH_DETECTOR_BLOCK_ENTITY;
 
   static {
     BREAKER_BLOCK = Registry.register(Registry.BLOCK, BREAKER,
@@ -74,10 +79,17 @@ public class MechanicsPlusMod implements ModInitializer {
     FAST_HOPPER_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, FASTHOPPER,
         BlockEntityType.Builder.create(FastHopperBlockEntity::new, FAST_HOPPER).build(null));
     FAST_HOPPER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(FASTHOPPER, FastHopperScreenHandler::new);
+
+    GROWTH_DETECTOR = Registry.register(Registry.BLOCK, GROWTHDETECTOR,
+        new GrowthDetectorBlock(FabricBlockSettings.copyOf(Blocks.OBSERVER)));
+    GROWTH_DETECTOR_ITEM = Registry.register(Registry.ITEM, GROWTHDETECTOR, 
+        new BlockItem(GROWTH_DETECTOR, new Item.Settings().group(ItemGroup.REDSTONE)));
+    GROWTH_DETECTOR_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, GROWTHDETECTOR, 
+        BlockEntityType.Builder.create(GrowthDetectorBlockEntity::new, GROWTH_DETECTOR).build(null));
   }
 
   @Override
   public void onInitialize() {
-
+    System.out.println("Mechanics initialized :)");
   }
 }
