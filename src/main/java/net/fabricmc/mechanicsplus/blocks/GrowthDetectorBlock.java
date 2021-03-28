@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 
 public class GrowthDetectorBlock extends FacingBlock implements BlockEntityProvider {
   
-  public static final IntProperty POWER = IntProperty.of("power", 0, 16);
+  public static final IntProperty POWER = IntProperty.of("power", 0, 9);
 
   public GrowthDetectorBlock(Settings settings) {
     super(settings);

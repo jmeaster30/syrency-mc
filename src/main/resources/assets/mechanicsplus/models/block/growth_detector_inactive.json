@@ -1,0 +1,11 @@
+{
+  "parent": "mechanicsplus:block/full_facing_block",
+  "textures": {
+    "front": "mechanicsplus:block/growth_front",
+    "top": "mechanicsplus:block/growth_top",
+    "back": "mechanicsplus:block/growth_back_inactive",
+    "left": "mechanicsplus:block/growth_sides",
+    "right": "mechanicsplus:block/growth_sides",
+    "bottom": "mechanicsplus:block/growth_bottom"
+  }
+}
