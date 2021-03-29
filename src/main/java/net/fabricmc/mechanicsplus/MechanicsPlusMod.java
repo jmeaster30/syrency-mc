@@ -21,6 +21,7 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final Identifier AUTOCRAFTER = new Identifier("mechanicsplus", "autocrafter_block");
   public static final Identifier PLACER = new Identifier("mechanicsplus", "placer_block");
   public static final Identifier FASTHOPPER = new Identifier("mechanicsplus", "fast_hopper");
+  public static final Identifier HUPPER = new Identifier("mechanicsplus", "hupper");
   public static final Identifier GROWTHDETECTOR = new Identifier("mechanicsplus", "growth_detector");
 
   public static final BreakerBlock BREAKER_BLOCK;
@@ -42,6 +43,11 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final BlockItem FAST_HOPPER_ITEM;
   public static final BlockEntityType<FastHopperBlockEntity> FAST_HOPPER_ENTITY;
   public static final ScreenHandlerType<FastHopperScreenHandler> FAST_HOPPER_SCREEN_HANDLER;
+
+  public static final HupperBlock HUPPER_BLOCK;
+  public static final BlockItem HUPPER_ITEM;
+  public static final BlockEntityType<HupperBlockEntity> HUPPER_ENTITY;
+  public static final ScreenHandlerType<HupperScreenHandler> HUPPER_SCREEN_HANDLER;
 
   public static final GrowthDetectorBlock GROWTH_DETECTOR;
   public static final BlockItem GROWTH_DETECTOR_ITEM;
@@ -79,6 +85,14 @@ public class MechanicsPlusMod implements ModInitializer {
     FAST_HOPPER_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, FASTHOPPER,
         BlockEntityType.Builder.create(FastHopperBlockEntity::new, FAST_HOPPER).build(null));
     FAST_HOPPER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(FASTHOPPER, FastHopperScreenHandler::new);
+
+    HUPPER_BLOCK = Registry.register(Registry.BLOCK, HUPPER,
+        new HupperBlock(FabricBlockSettings.copyOf(Blocks.HOPPER)));
+    HUPPER_ITEM = Registry.register(Registry.ITEM, HUPPER,
+        new BlockItem(HUPPER_BLOCK, new Item.Settings().group(ItemGroup.REDSTONE)));
+    HUPPER_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, HUPPER,
+        BlockEntityType.Builder.create(HupperBlockEntity::new, HUPPER_BLOCK).build(null));
+    HUPPER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(HUPPER, HupperScreenHandler::new);
 
     GROWTH_DETECTOR = Registry.register(Registry.BLOCK, GROWTHDETECTOR,
         new GrowthDetectorBlock(FabricBlockSettings.copyOf(Blocks.OBSERVER)));

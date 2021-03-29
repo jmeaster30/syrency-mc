@@ -16,13 +16,13 @@ If block is placeable on the spot then the block/item gets placed otherwise it g
 ### Fast Hopper
 Hopper that pulls 4 blocks per tick instead of just 1
 
+### Hupper (WIP)
+Hopper that pulls from the block below
+
 ### Growth Detector
 Observer type block that outputs a redstone signal power equal to how much the plant has grown. Does not work with vines, kelp, cacti, sugarcane, or bamboo because their age values were not really useful for what I wanted the behavior of this block to be. It works with all other crops though.
 
 ## Ideas
-
-### UpsideDown Hopper
-Hopper that pulls from the block below
 
 ### Splitter
 Hopper/block that takes in stuff from top then divides set items out the sides and any other items so out the bottom
