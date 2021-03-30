@@ -23,6 +23,7 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final Identifier FASTHOPPER = new Identifier("mechanicsplus", "fast_hopper");
   public static final Identifier HUPPER = new Identifier("mechanicsplus", "hupper");
   public static final Identifier GROWTHDETECTOR = new Identifier("mechanicsplus", "growth_detector");
+  public static final Identifier SPLITTER = new Identifier("mechanicsplus", "splitter");
 
   public static final BreakerBlock BREAKER_BLOCK;
   public static final BlockItem BREAKER_BLOCK_ITEM;
@@ -48,6 +49,11 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final BlockItem HUPPER_ITEM;
   public static final BlockEntityType<HupperBlockEntity> HUPPER_ENTITY;
   public static final ScreenHandlerType<HupperScreenHandler> HUPPER_SCREEN_HANDLER;
+
+  public static final SplitterBlock SPLITTER_BLOCK;
+  public static final BlockItem SPLITTER_ITEM;
+  public static final BlockEntityType<SplitterBlockEntity> SPLITTER_ENTITY;
+  public static final ScreenHandlerType<SplitterScreenHandler> SPLITTER_SCREEN_HANDLER;
 
   public static final GrowthDetectorBlock GROWTH_DETECTOR;
   public static final BlockItem GROWTH_DETECTOR_ITEM;
@@ -93,6 +99,14 @@ public class MechanicsPlusMod implements ModInitializer {
     HUPPER_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, HUPPER,
         BlockEntityType.Builder.create(HupperBlockEntity::new, HUPPER_BLOCK).build(null));
     HUPPER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(HUPPER, HupperScreenHandler::new);
+
+    SPLITTER_BLOCK = Registry.register(Registry.BLOCK, SPLITTER,
+        new SplitterBlock(FabricBlockSettings.copyOf(Blocks.HOPPER)));
+    SPLITTER_ITEM = Registry.register(Registry.ITEM, SPLITTER,
+        new BlockItem(SPLITTER_BLOCK, new Item.Settings().group(ItemGroup.REDSTONE)));
+    SPLITTER_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, SPLITTER,
+        BlockEntityType.Builder.create(SplitterBlockEntity::new, SPLITTER_BLOCK).build(null));
+    SPLITTER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(SPLITTER, SplitterScreenHandler::new);
 
     GROWTH_DETECTOR = Registry.register(Registry.BLOCK, GROWTHDETECTOR,
         new GrowthDetectorBlock(FabricBlockSettings.copyOf(Blocks.OBSERVER)));
