@@ -10,12 +10,12 @@ import net.minecraft.util.Identifier;
 
 public class SplitterScreen extends HandledScreen<SplitterScreenHandler> {
 
-  private static final Identifier TEXTURE = new Identifier("textures/gui/container/hopper.png");
+  private static final Identifier TEXTURE = new Identifier("mechanicsplus", "textures/gui/container/splitter.png");
 
   public SplitterScreen(SplitterScreenHandler handler, PlayerInventory inventory, Text title) {
     super(handler, inventory, title);
     this.passEvents = false;
-    this.backgroundHeight = 133;
+    this.backgroundHeight = 182;
     this.playerInventoryTitleY = this.backgroundHeight - 94;
   }
 

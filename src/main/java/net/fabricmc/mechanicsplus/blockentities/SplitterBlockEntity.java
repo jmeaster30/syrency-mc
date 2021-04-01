@@ -46,10 +46,20 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
   private long lastTickTime;
 
   private static final int ItemTransferSize = 1;
+  private static final int TotalInventorySize = 9;
+  private static final int StorageSize = 5;
+
+  /*
+  Slot 0-4 : Storage
+  Slot 5 : North
+  Slot 6 : East
+  Slot 7 : South
+  Slot 8 : West
+  */
 
   public SplitterBlockEntity() {
     super(MechanicsPlusMod.SPLITTER_ENTITY);
-    this.inventory = DefaultedList.ofSize(5, ItemStack.EMPTY);
+    this.inventory = DefaultedList.ofSize(TotalInventorySize, ItemStack.EMPTY);
     this.transferCooldown = -1;
   }
 
@@ -149,7 +159,21 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
   }
 
   private boolean insert() {
-    Inventory inventory = this.getOutputInventory();
+    ItemStack toMove = null;
+    int toMoveIndex = -1;
+    for(int i = 0; i < StorageSize; ++i) {
+      if (!this.getStack(i).isEmpty()) {
+        toMove = this.getStack(i);
+        toMoveIndex = -1;
+        break;
+      }
+    }
+
+    if (toMove == null) {
+      return false;
+    }
+
+    Inventory inventory = this.getOutputInventory(toMove);
     if (inventory == null) {
       return false;
     } else {
@@ -157,19 +181,14 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
       if (this.isInventoryFull(inventory, direction)) {
         return false;
       } else {
-        for(int i = 0; i < this.size(); ++i) {
-          if (!this.getStack(i).isEmpty()) {
-            ItemStack itemStack = this.getStack(i).copy();
-            ItemStack itemStack2 = transfer(this, inventory, this.removeStack(i, ItemTransferSize), direction);
-            if (itemStack2.isEmpty()) {
-              inventory.markDirty();
-              return true;
-            }
-
-            this.setStack(i, itemStack);
-          }
+        ItemStack itemStack = toMove.copy();
+        ItemStack itemStack2 = transfer(this, inventory, this.removeStack(toMoveIndex, ItemTransferSize), direction);
+        if (itemStack2.isEmpty()) {
+          inventory.markDirty();
+          return true;
         }
 
+        this.setStack(toMoveIndex, itemStack);
         return false;
       }
     }
@@ -316,7 +335,8 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
     return stack;
   }
 
-  private Inventory getOutputInventory() {
+  private Inventory getOutputInventory(ItemStack toMove) {
+    //TODO make it so it evenly splits items if there are duplicates in the input slots
     Direction direction = Direction.DOWN; // split the stuff here!!!
     return getInventoryAt(this.getWorld(), this.pos.offset(direction));
   }

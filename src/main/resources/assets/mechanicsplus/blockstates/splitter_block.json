@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "mechanicsplus:block/splitter_block" }
+  }
+}

@@ -22,13 +22,15 @@ Hopper that pulls from the block below
 ### Growth Detector
 Observer type block that outputs a redstone signal power equal to how much the plant has grown. Does not work with vines, kelp, cacti, sugarcane, or bamboo because their age values were not really useful for what I wanted the behavior of this block to be. It works with all other crops though.
 
-## Ideas
-
-### Splitter
+### Splitter (WIP)
 Hopper/block that takes in stuff from top then divides set items out the sides and any other items so out the bottom
 
-### Filter
-Hopper that only takes in stuff that matches the filter. can filter up to 5 items at a time if there are no item it doesn't take anything
+## Ideas
+
+### ~~Filter~~
+~~Hopper that only takes in stuff that matches the filter. can filter up to 5 items at a time if there are no item it doesn't take anything~~
+
+The filter can be implemented using the splitter.
 
 ### Link Chest
 A chest but it has an item slot that acts as a key and the contents of a link chest can be accessed from any other link chest with the same link item. It is sort of like the ender chest but with a code and I think there was another chest mod that did something similar but with a color code.

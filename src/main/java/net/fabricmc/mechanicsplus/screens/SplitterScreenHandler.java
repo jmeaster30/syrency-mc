@@ -13,30 +13,34 @@ public class SplitterScreenHandler extends ScreenHandler {
   private final Inventory inventory;
 
   public SplitterScreenHandler(int syncId, PlayerInventory playerInventory) {
-     this(syncId, playerInventory, new SimpleInventory(4));
+     this(syncId, playerInventory, new SimpleInventory(9));
   }
 
   public SplitterScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
     super(MechanicsPlusMod.SPLITTER_SCREEN_HANDLER, syncId);
     this.inventory = inventory;
-    checkSize(inventory, 4);
+    checkSize(inventory, 9);
     inventory.onOpen(playerInventory.player);
 
+    this.addSlot(new Slot(inventory, 5, 80, 17)); //north
+    this.addSlot(new Slot(inventory, 6, 98, 35)); //east
+    this.addSlot(new Slot(inventory, 7, 80, 53)); //south
+    this.addSlot(new Slot(inventory, 8, 62, 35)); //west
+
     int m;
-    for(m = 0; m < 4; ++m) {
-      this.addSlot(new Slot(inventory, m, 44 + m * 18, 20));
+    for(m = 0; m < 5; ++m) {
+      this.addSlot(new Slot(inventory, m, 44 + m * 18, 77));
     }
 
     for(m = 0; m < 3; ++m) {
       for(int l = 0; l < 9; ++l) {
-        this.addSlot(new Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, m * 18 + 51));
+        this.addSlot(new Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, m * 18 + 101));
       }
     }
 
     for(m = 0; m < 9; ++m) {
-      this.addSlot(new Slot(playerInventory, m, 8 + m * 18, 109));
+      this.addSlot(new Slot(playerInventory, m, 8 + m * 18, 159));
     }
-
   }
 
   public boolean canUse(PlayerEntity player) {

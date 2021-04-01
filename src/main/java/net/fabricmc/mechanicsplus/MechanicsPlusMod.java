@@ -23,7 +23,7 @@ public class MechanicsPlusMod implements ModInitializer {
   public static final Identifier FASTHOPPER = new Identifier("mechanicsplus", "fast_hopper");
   public static final Identifier HUPPER = new Identifier("mechanicsplus", "hupper");
   public static final Identifier GROWTHDETECTOR = new Identifier("mechanicsplus", "growth_detector");
-  public static final Identifier SPLITTER = new Identifier("mechanicsplus", "splitter");
+  public static final Identifier SPLITTER = new Identifier("mechanicsplus", "splitter_block");
 
   public static final BreakerBlock BREAKER_BLOCK;
   public static final BlockItem BREAKER_BLOCK_ITEM;
