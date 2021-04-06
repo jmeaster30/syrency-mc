@@ -1,7 +1,9 @@
 package net.fabricmc.mechanicsplus.blockentities;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -39,7 +41,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 
-public class SplitterBlockEntity extends LootableContainerBlockEntity implements Hopper, Tickable {
+public class SplitterBlockEntity extends LootableContainerBlockEntity implements SidedInventory, Hopper, Tickable {
   
   private DefaultedList<ItemStack> inventory;
   private int transferCooldown;
@@ -49,6 +51,8 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
   private static final int TotalInventorySize = 9;
   private static final int StorageSize = 5;
 
+  private static final int[] STORAGE_SLOTS = new int[] { 0, 1, 2, 3, 4 };
+  
   /*
   Slot 0-4 : Storage
   Slot 5 : North
@@ -164,7 +168,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
     for(int i = 0; i < StorageSize; ++i) {
       if (!this.getStack(i).isEmpty()) {
         toMove = this.getStack(i);
-        toMoveIndex = -1;
+        toMoveIndex = i;
         break;
       }
     }
@@ -173,11 +177,12 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
       return false;
     }
 
-    Inventory inventory = this.getOutputInventory(toMove);
+    Direction outputDirection = this.getOutputDirection(toMove);
+    Inventory inventory = this.getOutputInventory(outputDirection);
     if (inventory == null) {
       return false;
     } else {
-      Direction direction = Direction.DOWN.getOpposite();
+      Direction direction = outputDirection.getOpposite();
       if (this.isInventoryFull(inventory, direction)) {
         return false;
       } else {
@@ -230,7 +235,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
         itemEntity = (ItemEntity)var2.next();
       } while(!extract(hopper, itemEntity));
 
-      return true;
+      return false;
     }
   }
 
@@ -335,9 +340,32 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
     return stack;
   }
 
-  private Inventory getOutputInventory(ItemStack toMove) {
-    //TODO make it so it evenly splits items if there are duplicates in the input slots
-    Direction direction = Direction.DOWN; // split the stuff here!!!
+  private Direction getOutputDirection(ItemStack toMove) {
+    ArrayList<Direction> options = new ArrayList<Direction>();
+    for(int i = StorageSize; i < TotalInventorySize; i++) {
+      if(toMove.getItem().equals(inventory.get(i).getItem())) {
+        switch(i) {
+          case 5:
+            options.add(Direction.NORTH);
+            break;
+          case 6:
+            options.add(Direction.EAST);
+            break;
+          case 7:
+            options.add(Direction.SOUTH);
+            break;
+          case 8:
+            options.add(Direction.WEST);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+    return options.size() == 0 ? Direction.DOWN : options.get(new Random().nextInt(options.size()));
+  }
+
+  private Inventory getOutputInventory(Direction direction) {
     return getInventoryAt(this.getWorld(), this.pos.offset(direction));
   }
 
@@ -440,5 +468,22 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
 
   protected ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory) {
     return new SplitterScreenHandler(syncId, playerInventory, this);
+  }
+
+  public boolean canExtract(int slot, ItemStack stack, Direction dir) {
+    return false;
+  }
+
+  @Override
+  public boolean canInsert(int slot, ItemStack stack, Direction dir) {
+    if (dir == Direction.UP && slot < StorageSize) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public int[] getAvailableSlots(Direction side) {
+    return STORAGE_SLOTS;
   }
 }

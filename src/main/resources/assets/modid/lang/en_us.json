@@ -7,5 +7,6 @@
   "block.mechanicsplus.placer_block": "Placer",
   "block.mechanicsplus.fast_hopper": "Fast Hopper",
   "block.mechanicsplus.hupper": "Hupper",
-  "block.mechanicsplus.growth_detector": "Growth Detector"
+  "block.mechanicsplus.growth_detector": "Growth Detector",
+  "block.mechanicsplus.splitter_block": "Splitter"
 }
