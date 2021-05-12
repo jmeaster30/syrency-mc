@@ -118,6 +118,6 @@ public class MechanicsPlusMod implements ModInitializer {
 
   @Override
   public void onInitialize() {
-    System.out.println("Mechanics initialized :)");
+    System.out.println("Syrency initialized :)");
   }
 }

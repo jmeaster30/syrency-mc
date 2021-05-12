@@ -3,14 +3,14 @@
   "id": "mechanicsplus",
   "version": "${version}",
 
-  "name": "Mechanics Plus",
-  "description": "Adds some mechanics blocks to minecraft",
+  "name": "Syrency",
+  "description": "Adds some stuff to minecraft",
   "authors": [
     "Me!"
   ],
   "contact": {
     "homepage": "",
-    "sources": "https://github.com/jmeaster30/my-first-mc-mod"
+    "sources": "https://github.com/jmeaster30/syrency"
   },
 
   "license": "CC0-1.0",
