@@ -328,7 +328,7 @@ public class HupperBlockEntity  extends LootableContainerBlockEntity implements 
 
   public static List<ItemEntity> getInputItemEntities(Hopper hopper) {
     return (List<ItemEntity>)hopper.getInputAreaShape().getBoundingBoxes().stream().flatMap((box) -> {
-      return hopper.getWorld().getEntitiesByClass(ItemEntity.class, box.offset(hopper.getHopperX() - 0.5D, hopper.getHopperY() - 0.5D, hopper.getHopperZ() - 0.5D), EntityPredicates.VALID_ENTITY).stream();
+      return hopper.getWorld().getEntitiesByClass(ItemEntity.class, box.offset(hopper.getHopperX() - 0.5D, hopper.getHopperY() - 2.5D, hopper.getHopperZ() - 0.5D), EntityPredicates.VALID_ENTITY).stream();
     }).collect(Collectors.toList());
   }
 
