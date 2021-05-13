@@ -46,6 +46,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
   private DefaultedList<ItemStack> inventory;
   private int transferCooldown;
   private long lastTickTime;
+  private Random rng;
 
   private static final int ItemTransferSize = 1;
   private static final int TotalInventorySize = 9;
@@ -65,6 +66,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
     super(MechanicsPlusMod.SPLITTER_ENTITY);
     this.inventory = DefaultedList.ofSize(TotalInventorySize, ItemStack.EMPTY);
     this.transferCooldown = -1;
+    rng = new Random();
   }
 
   public void fromTag(BlockState state, CompoundTag tag) {
@@ -362,7 +364,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
         }
       }
     }
-    return options.size() == 0 ? Direction.DOWN : options.get(new Random().nextInt(options.size()));
+    return options.size() == 0 ? Direction.DOWN : options.get(rng.nextInt(options.size()));
   }
 
   private Inventory getOutputInventory(Direction direction) {

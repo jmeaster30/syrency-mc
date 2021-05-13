@@ -6,7 +6,7 @@
   "mixins": [
   ],
   "client": [
-    "SyrencyMixin"
+    "MechanicsPlusMixin"
   ],
   "injectors": {
     "defaultRequire": 1

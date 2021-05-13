@@ -84,6 +84,10 @@ public class GrowthDetectorBlockEntity extends BlockEntity implements Tickable{
     {
       return bs.get(Properties.AGE_7);
     }
+    else if(bs.contains(Properties.STAGE))
+    {
+      return bs.get(Properties.STAGE);
+    }
     else
     {
       return null;
