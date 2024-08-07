@@ -1,12 +1,12 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.fabricmc.mechanicsplus.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "package": "com.syrency.mc.mixin",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
   ],
   "client": [
-    "MechanicsPlusMixin"
+    "SyrencyMixin"
   ],
   "injectors": {
     "defaultRequire": 1

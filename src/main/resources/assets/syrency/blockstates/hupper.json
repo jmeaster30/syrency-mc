@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "syrency:block/hupper"
+    },
+    "facing=east": {
+      "model": "syrency:block/hupper_side",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "syrency:block/hupper_side"
+    },
+    "facing=south": {
+      "model": "syrency:block/hupper_side",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "syrency:block/hupper_side",
+      "y": 270
+    }
+  }
+}

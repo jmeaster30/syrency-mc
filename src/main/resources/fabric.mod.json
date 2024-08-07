@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "mechanicsplus",
+  "id": "syrency",
   "version": "${version}",
 
   "name": "Syrency",
@@ -19,10 +19,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.mechanicsplus.MechanicsPlusMod"
+      "com.syrency.mc.SyrencyMod"
     ],
     "client": [
-      "net.fabricmc.mechanicsplus.MechanicsPlusClientMod"
+      "com.syrency.mc.SyrencyClientMod"
     ]
   },
   "mixins": [
