@@ -6,12 +6,12 @@ import net.minecraft.screen.slot.Slot;
 
 public class NoInputSlot extends Slot {
 
-  public NoInputSlot(Inventory inventory, int index, int x, int y) {
-    super(inventory, index, x, y);
-  }
+    public NoInputSlot(Inventory inventory, int index, int x, int y) {
+        super(inventory, index, x, y);
+    }
 
-  public boolean canInsert(ItemStack itemStack) {
-    return false;
-  }
-  
+    public boolean canInsert(ItemStack itemStack) {
+        return false;
+    }
+
 }

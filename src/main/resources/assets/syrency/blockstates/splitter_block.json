@@ -1,5 +1,7 @@
 {
   "variants": {
-    "": { "model": "syrency:block/splitter_block" }
+    "": {
+      "model": "syrency:block/splitter_block"
+    }
   }
 }

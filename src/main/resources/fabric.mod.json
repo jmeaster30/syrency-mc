@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "syrency",
   "version": "${version}",
-
   "name": "Syrency",
   "description": "Adds some stuff to minecraft",
   "authors": [
@@ -12,10 +11,8 @@
     "homepage": "",
     "sources": "https://github.com/jmeaster30/syrency"
   },
-
   "license": "CC0-1.0",
   "icon": "assets/modid/icon.png",
-
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -28,7 +25,6 @@
   "mixins": [
     "modid.mixins.json"
   ],
-
   "depends": {
     "fabricloader": ">=0.7.4",
     "fabric": "*",

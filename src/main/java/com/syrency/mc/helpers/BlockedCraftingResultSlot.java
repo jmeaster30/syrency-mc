@@ -7,13 +7,13 @@ import net.minecraft.screen.slot.CraftingResultSlot;
 
 public class BlockedCraftingResultSlot extends CraftingResultSlot {
 
-  public BlockedCraftingResultSlot(PlayerEntity player, CraftingInventory input, Inventory inventory, int index, int x,
-      int y) {
-    super(player, input, inventory, index, x, y);
-  }
+    public BlockedCraftingResultSlot(PlayerEntity player, CraftingInventory input, Inventory inventory, int index, int x,
+                                     int y) {
+        super(player, input, inventory, index, x, y);
+    }
 
-  public boolean canTakeItems(PlayerEntity pEntity) {
-    return false;
-  }
-  
+    public boolean canTakeItems(PlayerEntity pEntity) {
+        return false;
+    }
+
 }

@@ -1,6 +1,6 @@
 {
   "type": "minecraft:block",
-  "pools" : [
+  "pools": [
     {
       "name": "syrency:growth_pool",
       "rolls": 1,

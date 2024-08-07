@@ -1,6 +1,6 @@
 {
   "type": "minecraft:block",
-  "pools" : [
+  "pools": [
     {
       "name": "syrency:splitter_pool",
       "rolls": 1,

@@ -1,6 +1,6 @@
 {
   "type": "minecraft:block",
-  "pools" : [
+  "pools": [
     {
       "name": "syrency:autocrafter_pool",
       "rolls": 1,

@@ -1,6 +1,6 @@
 {
   "type": "minecraft:block",
-  "pools" : [
+  "pools": [
     {
       "name": "syrency:fast_hopper_pool",
       "rolls": 1,

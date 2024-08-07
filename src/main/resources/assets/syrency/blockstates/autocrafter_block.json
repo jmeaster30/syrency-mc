@@ -1,5 +1,7 @@
 {
   "variants": {
-    "": { "model": "syrency:block/autocrafter_block" }
+    "": {
+      "model": "syrency:block/autocrafter_block"
+    }
   }
 }
