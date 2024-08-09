@@ -2,19 +2,15 @@ package com.syrency.mc.helpers;
 
 import com.syrency.mc.Utils;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.recipe.RecipeFinder;
 import net.minecraft.recipe.RecipeMatcher;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.collection.DefaultedList;
 
-import java.util.Iterator;
 import java.util.List;
 
 public class EntityCraftingInventory implements RecipeInputInventory {

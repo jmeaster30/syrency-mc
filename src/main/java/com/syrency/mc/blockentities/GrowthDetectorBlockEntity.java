@@ -4,9 +4,7 @@ import com.syrency.mc.SyrencyMod;
 import com.syrency.mc.blocks.GrowthDetectorBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.Tickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 

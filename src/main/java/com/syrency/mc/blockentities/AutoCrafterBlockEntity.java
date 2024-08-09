@@ -7,7 +7,6 @@ import com.syrency.mc.helpers.EntityCraftingInventory;
 import com.syrency.mc.screens.AutoCrafterScreenHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.CrafterBlock;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -16,12 +15,10 @@ import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.*;
 import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
@@ -54,8 +51,8 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
         OTHER_SLOTS = IntStream.range(0, INVENTORY_SIZE).map(x -> x + CRAFTING_TABLE_SIZE + 1).toArray();
     }
 
-    private DefaultedList<ItemStack> mainInventory = DefaultedList.ofSize(INVENTORY_SIZE, ItemStack.EMPTY);
-    private EntityCraftingInventory craftingTable = new EntityCraftingInventory(3, 3);
+    private final DefaultedList<ItemStack> mainInventory = DefaultedList.ofSize(INVENTORY_SIZE, ItemStack.EMPTY);
+    private final EntityCraftingInventory craftingTable = new EntityCraftingInventory(3, 3);
     private ItemStack outputStack = ItemStack.EMPTY;
 
     private int craftCooldown = -1;

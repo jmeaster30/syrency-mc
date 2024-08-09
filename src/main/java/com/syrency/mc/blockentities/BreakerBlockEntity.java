@@ -8,19 +8,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Tickable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -129,7 +125,7 @@ public class BreakerBlockEntity extends BlockEntity
 
             int maxUpdateDepth = 64;
 
-            world.breakBlock(inFront, false, (Entity) null, maxUpdateDepth);
+            world.breakBlock(inFront, false, null, maxUpdateDepth);
             actionDelay = 4;
             world.setBlockState(pos, thisState.with(BreakerBlock.ACTIVE, false));
         }

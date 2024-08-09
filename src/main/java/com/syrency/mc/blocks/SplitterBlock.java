@@ -74,8 +74,8 @@ public class SplitterBlock extends BlockWithEntity {
 
     private void updateEnabled(World world, BlockPos pos, BlockState state) {
         boolean bl = !world.isReceivingRedstonePower(pos);
-        if (bl != (Boolean) state.get(ENABLED)) {
-            world.setBlockState(pos, (BlockState) state.with(ENABLED, bl), 4);
+        if (bl != state.get(ENABLED)) {
+            world.setBlockState(pos, state.with(ENABLED, bl), 4);
         }
     }
 

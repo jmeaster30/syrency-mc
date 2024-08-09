@@ -1,7 +1,10 @@
 package com.syrency.mc.blockentities;
 
 import net.minecraft.block.*;
-import net.minecraft.block.entity.*;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.block.entity.Hopper;
+import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.inventory.Inventories;
@@ -25,10 +28,9 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEntity implements Hopper {
+    private static final int[][] AVAILABLE_SLOTS_CACHE = new int[54][];
     protected final int ItemTransferSize;
     protected final int TransferCooldown;
-
-    private static final int[][] AVAILABLE_SLOTS_CACHE = new int[54][];
     protected DefaultedList<ItemStack> inventory;
     protected int transferCooldown = -1;
     protected long lastTickTime;
@@ -43,56 +45,6 @@ public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEn
 
         this.ItemTransferSize = itemTransferSize;
         this.TransferCooldown = transferCooldown;
-    }
-
-    @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
-        this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
-        if (!this.readLootTable(nbt)) {
-            Inventories.readNbt(nbt, this.inventory, registryLookup);
-        }
-
-        this.transferCooldown = nbt.getInt("TransferCooldown");
-    }
-
-    @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
-        if (!this.writeLootTable(nbt)) {
-            Inventories.writeNbt(nbt, this.inventory, registryLookup);
-        }
-
-        nbt.putInt("TransferCooldown", this.transferCooldown);
-    }
-
-    @Override
-    public int size() {
-        return this.inventory.size();
-    }
-
-    @Override
-    public ItemStack removeStack(int slot, int amount) {
-        this.generateLoot(null);
-        return Inventories.splitStack(this.getHeldStacks(), slot, amount);
-    }
-
-    @Override
-    public void setStack(int slot, ItemStack stack) {
-        this.generateLoot(null);
-        this.getHeldStacks().set(slot, stack);
-        stack.capCount(this.getMaxCount(stack));
-    }
-
-    @Override
-    public void setCachedState(BlockState state) {
-        super.setCachedState(state);
-        this.facing = state.get(facingProperty);
-    }
-
-    @Override
-    protected Text getContainerName() {
-        return Text.translatable(getCachedState().getBlock().getTranslationKey());
     }
 
     public static <T extends AbstractHopperBlockEntity> void serverTick(World world, BlockPos pos, BlockState state, T blockEntity) {
@@ -125,16 +77,6 @@ public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEn
         }
 
         return false;
-    }
-
-    boolean isFull() {
-        for (ItemStack itemStack : this.inventory) {
-            if (itemStack.isEmpty() || itemStack.getCount() != itemStack.getMaxCount()) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private static <T extends AbstractHopperBlockEntity> boolean insert(World world, BlockPos pos, T blockEntity) {
@@ -297,11 +239,7 @@ public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEn
         if (!inventory.isValid(slot, stack)) {
             return false;
         } else {
-            if (inventory instanceof SidedInventory sidedInventory && !sidedInventory.canInsert(slot, stack, side)) {
-                return false;
-            }
-
-            return true;
+            return !(inventory instanceof SidedInventory sidedInventory) || sidedInventory.canInsert(slot, stack, side);
         }
     }
 
@@ -309,11 +247,7 @@ public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEn
         if (!fromInventory.canTransferTo(hopperInventory, slot, stack)) {
             return false;
         } else {
-            if (fromInventory instanceof SidedInventory sidedInventory && !sidedInventory.canExtract(slot, stack, facing)) {
-                return false;
-            }
-
-            return true;
+            return !(fromInventory instanceof SidedInventory sidedInventory) || sidedInventory.canExtract(slot, stack, facing);
         }
     }
 
@@ -368,7 +302,7 @@ public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEn
 
     @Nullable
     public static Inventory getInventoryAt(World world, BlockPos pos) {
-        return getInventoryAt(world, pos, world.getBlockState(pos), (double)pos.getX() + 0.5, (double)pos.getY() + 0.5, (double)pos.getZ() + 0.5);
+        return getInventoryAt(world, pos, world.getBlockState(pos), (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5);
     }
 
     @Nullable
@@ -385,10 +319,10 @@ public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEn
     private static Inventory getBlockInventoryAt(World world, BlockPos pos, BlockState state) {
         Block block = state.getBlock();
         if (block instanceof InventoryProvider) {
-            return ((InventoryProvider)block).getInventory(state, world, pos);
+            return ((InventoryProvider) block).getInventory(state, world, pos);
         } else if (state.hasBlockEntity() && world.getBlockEntity(pos) instanceof Inventory inventory) {
             if (inventory instanceof ChestBlockEntity && block instanceof ChestBlock) {
-                inventory = ChestBlock.getInventory((ChestBlock)block, state, world, pos, true);
+                inventory = ChestBlock.getInventory((ChestBlock) block, state, world, pos, true);
             }
 
             return inventory;
@@ -400,26 +334,94 @@ public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEn
     @Nullable
     private static Inventory getEntityInventoryAt(World world, double x, double y, double z) {
         List<Entity> list = world.getOtherEntities(null, new Box(x - 0.5, y - 0.5, z - 0.5, x + 0.5, y + 0.5, z + 0.5), EntityPredicates.VALID_INVENTORIES);
-        return !list.isEmpty() ? (Inventory)list.get(world.random.nextInt(list.size())) : null;
+        return !list.isEmpty() ? (Inventory) list.get(world.random.nextInt(list.size())) : null;
     }
 
     private static boolean canMergeItems(ItemStack first, ItemStack second) {
         return first.getCount() <= first.getMaxCount() && ItemStack.areItemsAndComponentsEqual(first, second);
     }
 
+    public static void onEntityCollided(World world, BlockPos pos, BlockState state, Entity entity, AbstractHopperBlockEntity blockEntity) {
+        if (entity instanceof ItemEntity itemEntity
+                && !itemEntity.getStack().isEmpty()
+                && entity.getBoundingBox().offset(-pos.getX(), -pos.getY(), -pos.getZ()).intersects(blockEntity.getInputAreaShape())) {
+            insertAndExtract(world, pos, state, blockEntity, () -> extract(blockEntity, itemEntity));
+        }
+    }
+
+    @Override
+    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.readNbt(nbt, registryLookup);
+        this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
+        if (!this.readLootTable(nbt)) {
+            Inventories.readNbt(nbt, this.inventory, registryLookup);
+        }
+
+        this.transferCooldown = nbt.getInt("TransferCooldown");
+    }
+
+    @Override
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.writeNbt(nbt, registryLookup);
+        if (!this.writeLootTable(nbt)) {
+            Inventories.writeNbt(nbt, this.inventory, registryLookup);
+        }
+
+        nbt.putInt("TransferCooldown", this.transferCooldown);
+    }
+
+    @Override
+    public int size() {
+        return this.inventory.size();
+    }
+
+    @Override
+    public ItemStack removeStack(int slot, int amount) {
+        this.generateLoot(null);
+        return Inventories.splitStack(this.getHeldStacks(), slot, amount);
+    }
+
+    @Override
+    public void setStack(int slot, ItemStack stack) {
+        this.generateLoot(null);
+        this.getHeldStacks().set(slot, stack);
+        stack.capCount(this.getMaxCount(stack));
+    }
+
+    @Override
+    public void setCachedState(BlockState state) {
+        super.setCachedState(state);
+        this.facing = state.get(facingProperty);
+    }
+
+    @Override
+    protected Text getContainerName() {
+        return Text.translatable(getCachedState().getBlock().getTranslationKey());
+    }
+
+    boolean isFull() {
+        for (ItemStack itemStack : this.inventory) {
+            if (itemStack.isEmpty() || itemStack.getCount() != itemStack.getMaxCount()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     @Override
     public double getHopperX() {
-        return (double)this.pos.getX() + 0.5;
+        return (double) this.pos.getX() + 0.5;
     }
 
     @Override
     public double getHopperY() {
-        return (double)this.pos.getY() + 0.5;
+        return (double) this.pos.getY() + 0.5;
     }
 
     @Override
     public double getHopperZ() {
-        return (double)this.pos.getZ() + 0.5;
+        return (double) this.pos.getZ() + 0.5;
     }
 
     @Override
@@ -447,13 +449,5 @@ public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEn
     @Override
     protected void setHeldStacks(DefaultedList<ItemStack> inventory) {
         this.inventory = inventory;
-    }
-
-    public static void onEntityCollided(World world, BlockPos pos, BlockState state, Entity entity, AbstractHopperBlockEntity blockEntity) {
-        if (entity instanceof ItemEntity itemEntity
-                && !itemEntity.getStack().isEmpty()
-                && entity.getBoundingBox().offset((double)(-pos.getX()), (double)(-pos.getY()), (double)(-pos.getZ())).intersects(blockEntity.getInputAreaShape())) {
-            insertAndExtract(world, pos, state, blockEntity, () -> extract(blockEntity, itemEntity));
-        }
     }
 }

@@ -19,12 +19,9 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Tickable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
@@ -50,7 +47,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
     private DefaultedList<ItemStack> inventory;
     private int transferCooldown;
     private long lastTickTime;
-    private Random rng;
+    private final Random rng;
   
   /*
   Slot 0-4 : Storage
@@ -81,7 +78,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
         Inventory inventory = getInputInventory(hopper);
         if (inventory != null) {
             Direction direction = Direction.DOWN;
-            return isInventoryEmpty(inventory, direction) ? false : getAvailableSlots(inventory, direction).anyMatch((i) -> {
+            return !isInventoryEmpty(inventory, direction) && getAvailableSlots(inventory, direction).anyMatch((i) -> {
                 return extract(hopper, inventory, i, direction);
             });
         } else {
@@ -93,7 +90,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
                     return false;
                 }
 
-                itemEntity = (ItemEntity) var2.next();
+                itemEntity = var2.next();
             } while (!extract(hopper, itemEntity));
 
             return false;
@@ -104,7 +101,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
         ItemStack itemStack = inventory.getStack(slot);
         if (!itemStack.isEmpty() && canExtract(inventory, itemStack, slot, side)) {
             ItemStack itemStack2 = itemStack.copy();
-            ItemStack itemStack3 = transfer(inventory, hopper, inventory.removeStack(slot, ItemTransferSize), (Direction) null);
+            ItemStack itemStack3 = transfer(inventory, hopper, inventory.removeStack(slot, ItemTransferSize), null);
             if (itemStack3.isEmpty()) {
                 inventory.markDirty();
                 return true;
@@ -119,7 +116,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
     public static boolean extract(Inventory inventory, ItemEntity itemEntity) {
         boolean bl = false;
         ItemStack itemStack = itemEntity.getStack().copy();
-        ItemStack itemStack2 = transfer((Inventory) null, inventory, itemStack, (Direction) null);
+        ItemStack itemStack2 = transfer(null, inventory, itemStack, null);
         if (itemStack2.isEmpty()) {
             bl = true;
             itemEntity.remove();
@@ -131,8 +128,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
     }
 
     public static ItemStack transfer(Inventory from, Inventory to, ItemStack stack, Direction side) {
-        if (to instanceof SidedInventory && side != null) {
-            SidedInventory sidedInventory = (SidedInventory) to;
+        if (to instanceof SidedInventory sidedInventory && side != null) {
             int[] is = sidedInventory.getAvailableSlots(side);
 
             for (int i = 0; i < is.length && !stack.isEmpty(); ++i) {
@@ -179,12 +175,10 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
             }
 
             if (bl) {
-                if (bl2 && to instanceof SplitterBlockEntity) {
-                    SplitterBlockEntity hopperBlockEntity = (SplitterBlockEntity) to;
+                if (bl2 && to instanceof SplitterBlockEntity hopperBlockEntity) {
                     if (!hopperBlockEntity.isDisabled()) {
                         int k = 0;
-                        if (from instanceof SplitterBlockEntity) {
-                            SplitterBlockEntity hopperBlockEntity2 = (SplitterBlockEntity) from;
+                        if (from instanceof SplitterBlockEntity hopperBlockEntity2) {
                             if (hopperBlockEntity.lastTickTime >= hopperBlockEntity2.lastTickTime) {
                                 k = 1;
                             }
@@ -233,13 +227,13 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
         }
 
         if (inventory == null) {
-            List<Entity> list = world.getOtherEntities((Entity) null, new Box(x - 0.5D, y - 0.5D, z - 0.5D, x + 0.5D, y + 0.5D, z + 0.5D), EntityPredicates.VALID_INVENTORIES);
+            List<Entity> list = world.getOtherEntities(null, new Box(x - 0.5D, y - 0.5D, z - 0.5D, x + 0.5D, y + 0.5D, z + 0.5D), EntityPredicates.VALID_INVENTORIES);
             if (!list.isEmpty()) {
                 inventory = (Inventory) list.get(world.random.nextInt(list.size()));
             }
         }
 
-        return (Inventory) inventory;
+        return inventory;
     }
 
     private static boolean canMergeItems(ItemStack first, ItemStack second) {
@@ -311,14 +305,14 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
 
     private boolean insertAndExtract(Supplier<Boolean> extractMethod) {
         if (this.world != null && !this.world.isClient) {
-            if (!this.needsCooldown() && (Boolean) this.getCachedState().get(SplitterBlock.ENABLED)) {
+            if (!this.needsCooldown() && this.getCachedState().get(SplitterBlock.ENABLED)) {
                 boolean bl = false;
                 if (!this.isEmpty()) {
                     bl = this.insert();
                 }
 
                 if (!this.isFull()) {
-                    bl |= (Boolean) extractMethod.get();
+                    bl |= extractMethod.get();
                 }
 
                 if (bl) {
@@ -343,7 +337,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
                 return true;
             }
 
-            itemStack = (ItemStack) var1.next();
+            itemStack = var1.next();
         } while (!itemStack.isEmpty() && itemStack.getCount() == itemStack.getMaxCount());
 
         return false;
@@ -457,7 +451,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
     public void onEntityCollided(Entity entity) {
         if (entity instanceof ItemEntity) {
             BlockPos blockPos = this.getPos();
-            if (VoxelShapes.matchesAnywhere(VoxelShapes.cuboid(entity.getBoundingBox().offset((double) (-blockPos.getX()), (double) (-blockPos.getY()), (double) (-blockPos.getZ()))), this.getInputAreaShape(), BooleanBiFunction.AND)) {
+            if (VoxelShapes.matchesAnywhere(VoxelShapes.cuboid(entity.getBoundingBox().offset(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ())), this.getInputAreaShape(), BooleanBiFunction.AND)) {
                 this.insertAndExtract(() -> {
                     return extract(this, (ItemEntity) entity);
                 });
@@ -476,10 +470,7 @@ public class SplitterBlockEntity extends LootableContainerBlockEntity implements
 
     @Override
     public boolean canInsert(int slot, ItemStack stack, Direction dir) {
-        if (dir == Direction.UP && slot < StorageSize) {
-            return true;
-        }
-        return false;
+        return dir == Direction.UP && slot < StorageSize;
     }
 
     @Override
