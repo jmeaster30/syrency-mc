@@ -4,26 +4,28 @@ import com.syrency.mc.blockentities.*;
 import com.syrency.mc.blocks.*;
 import com.syrency.mc.screens.*;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 
 public class SyrencyMod implements ModInitializer {
+    public static final String NAMESPACE = "syrency";
 
-    public static final Identifier BREAKER = new Identifier("syrency", "breaker_block");
-    public static final Identifier AUTOCRAFTER = new Identifier("syrency", "autocrafter_block");
-    public static final Identifier PLACER = new Identifier("syrency", "placer_block");
-    public static final Identifier FASTHOPPER = new Identifier("syrency", "fast_hopper");
-    public static final Identifier HUPPER = new Identifier("syrency", "hupper");
-    public static final Identifier GROWTHDETECTOR = new Identifier("syrency", "growth_detector");
-    public static final Identifier SPLITTER = new Identifier("syrency", "splitter_block");
+    public static final Identifier BREAKER = Identifier.of(NAMESPACE, "breaker_block");
+    public static final Identifier AUTOCRAFTER = Identifier.of(NAMESPACE, "autocrafter_block");
+    public static final Identifier PLACER = Identifier.of(NAMESPACE, "placer_block");
+    public static final Identifier FASTHOPPER = Identifier.of(NAMESPACE, "fast_hopper");
+    public static final Identifier HUPPER = Identifier.of(NAMESPACE, "hupper");
+    public static final Identifier GROWTHDETECTOR = Identifier.of(NAMESPACE, "growth_detector");
+    public static final Identifier SPLITTER = Identifier.of(NAMESPACE, "splitter_block");
 
     public static final BreakerBlock BREAKER_BLOCK;
     public static final BlockItem BREAKER_BLOCK_ITEM;
@@ -60,60 +62,39 @@ public class SyrencyMod implements ModInitializer {
     public static final BlockEntityType<GrowthDetectorBlockEntity> GROWTH_DETECTOR_BLOCK_ENTITY;
 
     static {
-        BREAKER_BLOCK = Registry.register(Registry.BLOCK, BREAKER,
-                new BreakerBlock(FabricBlockSettings.copyOf(Blocks.DISPENSER)));
-        BREAKER_BLOCK_ITEM = Registry.register(Registry.ITEM, BREAKER,
-                new BlockItem(BREAKER_BLOCK, new Item.Settings().group(ItemGroup.REDSTONE)));
-        BREAKER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, BREAKER,
-                BlockEntityType.Builder.create(BreakerBlockEntity::new, BREAKER_BLOCK).build(null));
-        BREAKER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(BREAKER, BreakerScreenHandler::new);
+        BREAKER_BLOCK = Registry.register(Registries.BLOCK, BREAKER, new BreakerBlock(AbstractBlock.Settings.copy(Blocks.DISPENSER)));
+        BREAKER_BLOCK_ITEM = Registry.register(Registries.ITEM, BREAKER, new BlockItem(BREAKER_BLOCK, new Item.Settings()));
+        BREAKER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, BREAKER, BlockEntityType.Builder.create(BreakerBlockEntity::new, BREAKER_BLOCK).build(null));
+        BREAKER_SCREEN_HANDLER = Registry.register(Registries.SCREEN_HANDLER, BREAKER, new ScreenHandlerType<>(BreakerScreenHandler::new, FeatureFlags.VANILLA_FEATURES));
 
-        AUTOCRAFTER_BLOCK = Registry.register(Registry.BLOCK, AUTOCRAFTER,
-                new AutoCrafterBlock(FabricBlockSettings.copyOf(Blocks.DISPENSER)));
-        AUTOCRAFTER_BLOCK_ITEM = Registry.register(Registry.ITEM, AUTOCRAFTER,
-                new BlockItem(AUTOCRAFTER_BLOCK, new Item.Settings().group(ItemGroup.REDSTONE)));
-        AUTOCRAFTER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, AUTOCRAFTER,
-                BlockEntityType.Builder.create(AutoCrafterBlockEntity::new, AUTOCRAFTER_BLOCK).build(null));
-        AUTOCRAFTER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(AUTOCRAFTER, AutoCrafterScreenHandler::new);
+        AUTOCRAFTER_BLOCK = Registry.register(Registries.BLOCK, AUTOCRAFTER, new AutoCrafterBlock(AbstractBlock.Settings.copy(Blocks.DISPENSER)));
+        AUTOCRAFTER_BLOCK_ITEM = Registry.register(Registries.ITEM, AUTOCRAFTER, new BlockItem(AUTOCRAFTER_BLOCK, new Item.Settings()));
+        AUTOCRAFTER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, AUTOCRAFTER, BlockEntityType.Builder.create(AutoCrafterBlockEntity::new, AUTOCRAFTER_BLOCK).build(null));
+        AUTOCRAFTER_SCREEN_HANDLER = Registry.register(Registries.SCREEN_HANDLER, AUTOCRAFTER, new ScreenHandlerType<>(AutoCrafterScreenHandler::new, FeatureFlags.VANILLA_FEATURES));
 
-        PLACER_BLOCK = Registry.register(Registry.BLOCK, PLACER,
-                new PlacerBlock(FabricBlockSettings.copyOf(Blocks.DISPENSER)));
-        PLACER_BLOCK_ITEM = Registry.register(Registry.ITEM, PLACER,
-                new BlockItem(PLACER_BLOCK, new Item.Settings().group(ItemGroup.REDSTONE)));
-        PLACER_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, PLACER,
-                BlockEntityType.Builder.create(PlacerBlockEntity::new, PLACER_BLOCK).build(null));
-        PLACER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(PLACER, PlacerScreenHandler::new);
+        PLACER_BLOCK = Registry.register(Registries.BLOCK, PLACER, new PlacerBlock(AbstractBlock.Settings.copy(Blocks.DISPENSER)));
+        PLACER_BLOCK_ITEM = Registry.register(Registries.ITEM, PLACER, new BlockItem(PLACER_BLOCK, new Item.Settings()));
+        PLACER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, PLACER, BlockEntityType.Builder.create(PlacerBlockEntity::new, PLACER_BLOCK).build(null));
+        PLACER_SCREEN_HANDLER = Registry.register(Registries.SCREEN_HANDLER, PLACER, new ScreenHandlerType<>(PlacerScreenHandler::new, FeatureFlags.VANILLA_FEATURES));
 
-        FAST_HOPPER = Registry.register(Registry.BLOCK, FASTHOPPER,
-                new FastHopperBlock(FabricBlockSettings.copyOf(Blocks.HOPPER)));
-        FAST_HOPPER_ITEM = Registry.register(Registry.ITEM, FASTHOPPER,
-                new BlockItem(FAST_HOPPER, new Item.Settings().group(ItemGroup.REDSTONE)));
-        FAST_HOPPER_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, FASTHOPPER,
-                BlockEntityType.Builder.create(FastHopperBlockEntity::new, FAST_HOPPER).build(null));
-        FAST_HOPPER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(FASTHOPPER, FastHopperScreenHandler::new);
+        FAST_HOPPER = Registry.register(Registries.BLOCK, FASTHOPPER, new FastHopperBlock(AbstractBlock.Settings.copy(Blocks.HOPPER)));
+        FAST_HOPPER_ITEM = Registry.register(Registries.ITEM, FASTHOPPER, new BlockItem(FAST_HOPPER, new Item.Settings()));
+        FAST_HOPPER_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, FASTHOPPER, BlockEntityType.Builder.create(FastHopperBlockEntity::new, FAST_HOPPER).build(null));
+        FAST_HOPPER_SCREEN_HANDLER = Registry.register(Registries.SCREEN_HANDLER, FASTHOPPER, new ScreenHandlerType<>(FastHopperScreenHandler::new, FeatureFlags.VANILLA_FEATURES));
 
-        HUPPER_BLOCK = Registry.register(Registry.BLOCK, HUPPER,
-                new HupperBlock(FabricBlockSettings.copyOf(Blocks.HOPPER)));
-        HUPPER_ITEM = Registry.register(Registry.ITEM, HUPPER,
-                new BlockItem(HUPPER_BLOCK, new Item.Settings().group(ItemGroup.REDSTONE)));
-        HUPPER_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, HUPPER,
-                BlockEntityType.Builder.create(HupperBlockEntity::new, HUPPER_BLOCK).build(null));
-        HUPPER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(HUPPER, HupperScreenHandler::new);
+        HUPPER_BLOCK = Registry.register(Registries.BLOCK, HUPPER, new HupperBlock(AbstractBlock.Settings.copy(Blocks.HOPPER)));
+        HUPPER_ITEM = Registry.register(Registries.ITEM, HUPPER, new BlockItem(HUPPER_BLOCK, new Item.Settings()));
+        HUPPER_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, HUPPER, BlockEntityType.Builder.create(HupperBlockEntity::new, HUPPER_BLOCK).build(null));
+        HUPPER_SCREEN_HANDLER = Registry.register(Registries.SCREEN_HANDLER, HUPPER, new ScreenHandlerType<>(HupperScreenHandler::new, FeatureFlags.VANILLA_FEATURES));
 
-        SPLITTER_BLOCK = Registry.register(Registry.BLOCK, SPLITTER,
-                new SplitterBlock(FabricBlockSettings.copyOf(Blocks.HOPPER)));
-        SPLITTER_ITEM = Registry.register(Registry.ITEM, SPLITTER,
-                new BlockItem(SPLITTER_BLOCK, new Item.Settings().group(ItemGroup.REDSTONE)));
-        SPLITTER_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, SPLITTER,
-                BlockEntityType.Builder.create(SplitterBlockEntity::new, SPLITTER_BLOCK).build(null));
-        SPLITTER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(SPLITTER, SplitterScreenHandler::new);
+        SPLITTER_BLOCK = Registry.register(Registries.BLOCK, SPLITTER, new SplitterBlock(AbstractBlock.Settings.copy(Blocks.HOPPER)));
+        SPLITTER_ITEM = Registry.register(Registries.ITEM, SPLITTER, new BlockItem(SPLITTER_BLOCK, new Item.Settings()));
+        SPLITTER_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, SPLITTER, BlockEntityType.Builder.create(SplitterBlockEntity::new, SPLITTER_BLOCK).build(null));
+        SPLITTER_SCREEN_HANDLER = Registry.register(Registries.SCREEN_HANDLER, SPLITTER, new ScreenHandlerType<>(SplitterScreenHandler::new, FeatureFlags.VANILLA_FEATURES));
 
-        GROWTH_DETECTOR = Registry.register(Registry.BLOCK, GROWTHDETECTOR,
-                new GrowthDetectorBlock(FabricBlockSettings.copyOf(Blocks.OBSERVER)));
-        GROWTH_DETECTOR_ITEM = Registry.register(Registry.ITEM, GROWTHDETECTOR,
-                new BlockItem(GROWTH_DETECTOR, new Item.Settings().group(ItemGroup.REDSTONE)));
-        GROWTH_DETECTOR_BLOCK_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, GROWTHDETECTOR,
-                BlockEntityType.Builder.create(GrowthDetectorBlockEntity::new, GROWTH_DETECTOR).build(null));
+        GROWTH_DETECTOR = Registry.register(Registries.BLOCK, GROWTHDETECTOR, new GrowthDetectorBlock(AbstractBlock.Settings.copy(Blocks.OBSERVER)));
+        GROWTH_DETECTOR_ITEM = Registry.register(Registries.ITEM, GROWTHDETECTOR, new BlockItem(GROWTH_DETECTOR, new Item.Settings()));
+        GROWTH_DETECTOR_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, GROWTHDETECTOR, BlockEntityType.Builder.create(GrowthDetectorBlockEntity::new, GROWTH_DETECTOR).build(null));
     }
 
     @Override

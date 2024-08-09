@@ -13,7 +13,7 @@ public class FastHopperScreenHandler extends ScreenHandler {
     private final Inventory inventory;
 
     public FastHopperScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, new SimpleInventory(5));
+        this(syncId, playerInventory, new SimpleInventory(5)); // TODO have this set in SyrencyMod as a constant value
     }
 
     public FastHopperScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
@@ -36,39 +36,37 @@ public class FastHopperScreenHandler extends ScreenHandler {
         for (m = 0; m < 9; ++m) {
             this.addSlot(new Slot(playerInventory, m, 8 + m * 18, 109));
         }
-
     }
 
+
+    @Override
     public boolean canUse(PlayerEntity player) {
         return this.inventory.canPlayerUse(player);
     }
 
-    public ItemStack transferSlot(PlayerEntity player, int index) {
+    @Override
+    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
         ItemStack itemStack = ItemStack.EMPTY;
-        Slot slot = (Slot) this.slots.get(index);
-        if (slot != null && slot.hasStack()) {
-            ItemStack itemStack2 = slot.getStack();
-            itemStack = itemStack2.copy();
-            if (index < this.inventory.size()) {
-                if (!this.insertItem(itemStack2, this.inventory.size(), this.slots.size(), true)) {
-                    return ItemStack.EMPTY;
-                }
-            } else if (!this.insertItem(itemStack2, 0, this.inventory.size(), false)) {
+        Slot slot = this.slots.get(slotIndex);
+        if (!slot.hasStack())
+            return itemStack;
+
+        ItemStack itemStack2 = slot.getStack();
+        itemStack = itemStack2.copy();
+        if (slotIndex < this.inventory.size()) {
+            if (!this.insertItem(itemStack2, this.inventory.size(), this.slots.size(), true)) {
                 return ItemStack.EMPTY;
             }
+        } else if (!this.insertItem(itemStack2, 0, this.inventory.size(), false)) {
+            return ItemStack.EMPTY;
+        }
 
-            if (itemStack2.isEmpty()) {
-                slot.setStack(ItemStack.EMPTY);
-            } else {
-                slot.markDirty();
-            }
+        if (itemStack2.isEmpty()) {
+            slot.setStack(ItemStack.EMPTY);
+        } else {
+            slot.markDirty();
         }
 
         return itemStack;
-    }
-
-    public void close(PlayerEntity player) {
-        super.close(player);
-        this.inventory.onClose(player);
     }
 }

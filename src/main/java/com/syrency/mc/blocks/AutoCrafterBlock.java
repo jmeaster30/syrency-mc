@@ -1,16 +1,22 @@
 package com.syrency.mc.blocks;
 
+import com.mojang.serialization.MapCodec;
+import com.syrency.mc.SyrencyMod;
 import com.syrency.mc.blockentities.AutoCrafterBlockEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
+import com.syrency.mc.blockentities.HupperBlockEntity;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.enums.Orientation;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.EnumProperty;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
@@ -18,33 +24,35 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
-public class AutoCrafterBlock extends Block implements BlockEntityProvider {
+public class AutoCrafterBlock extends BlockWithEntity {
+    public static final MapCodec<AutoCrafterBlock> CODEC = createCodec(AutoCrafterBlock::new);
+    public static final BooleanProperty CRAFTING = Properties.CRAFTING;
+    private static final EnumProperty<Orientation> ORIENTATION = Properties.ORIENTATION;
 
     public AutoCrafterBlock(Settings settings) {
         super(settings);
-        setDefaultState(getStateManager().getDefaultState());
+        setDefaultState(getStateManager().getDefaultState().with(ORIENTATION, Orientation.NORTH_UP).with(CRAFTING, Boolean.FALSE));
     }
 
     @Override
-    public void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
-        return;
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new AutoCrafterBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return world.isClient ? null : validateTicker(type, SyrencyMod.AUTOCRAFTER_BLOCK_ENTITY, AutoCrafterBlockEntity::serverTick);
     }
 
     @Override
-    public BlockEntity createBlockEntity(BlockView blockView) {
-        return new AutoCrafterBlockEntity();
-    }
+    public MapCodec<AutoCrafterBlock> getCodec() { return CODEC; }
 
     @Override
     public BlockRenderType getRenderType(BlockState state) {
         return BlockRenderType.MODEL;
-    }
-
-    public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
-        super.onSyncedBlockEvent(state, world, pos, type, data);
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        return blockEntity == null ? false : blockEntity.onSyncedBlockEvent(type, data);
     }
 
     public NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
@@ -52,22 +60,15 @@ public class AutoCrafterBlock extends Block implements BlockEntityProvider {
         return blockEntity instanceof NamedScreenHandlerFactory ? (NamedScreenHandlerFactory) blockEntity : null;
     }
 
-    public BlockState getPlacementState(ItemPlacementContext ctxt) {
-        return (BlockState) this.getDefaultState();
-    }
-
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
-                              BlockHitResult hit) {
-        if (!world.isClient) {
-            //player.sendMessage(new LiteralText("You used this block!!"), false);
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (world.isClient)
+            return ActionResult.SUCCESS;
 
-            NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
+        NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
 
-            if (screenHandlerFactory != null) {
-                //player.sendMessage(new LiteralText("Opened screen"), false);
-                player.openHandledScreen(screenHandlerFactory);
-            }
+        if (screenHandlerFactory != null) {
+            player.openHandledScreen(screenHandlerFactory);
         }
 
         return ActionResult.CONSUME;

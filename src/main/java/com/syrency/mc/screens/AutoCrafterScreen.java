@@ -1,6 +1,7 @@
 package com.syrency.mc.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.syrency.mc.SyrencyMod;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
@@ -10,7 +11,7 @@ import net.minecraft.util.Identifier;
 
 public class AutoCrafterScreen extends HandledScreen<ScreenHandler> {
 
-    private static final Identifier TEXTURE = new Identifier("syrency", "textures/gui/container/autocrafterscreen.png");
+    private static final Identifier TEXTURE = Identifier.of(SyrencyMod.NAMESPACE, "textures/gui/container/autocrafterscreen.png");
 
     public AutoCrafterScreen(ScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
