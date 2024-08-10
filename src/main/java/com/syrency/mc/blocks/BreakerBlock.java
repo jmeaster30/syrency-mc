@@ -1,8 +1,12 @@
 package com.syrency.mc.blocks;
 
+import com.mojang.serialization.MapCodec;
+import com.syrency.mc.SyrencyMod;
 import com.syrency.mc.blockentities.BreakerBlockEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.screen.NamedScreenHandlerFactory;
@@ -11,18 +15,17 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 public class BreakerBlock extends FacingBlock implements BlockEntityProvider {
 
-    // warning we are not changing this at all and we didn't set up the different
-    // variants for the model
+    public static final MapCodec<BreakerBlock> CODEC = createCodec(BreakerBlock::new);
+    // TODO actually change this properly and make it change to the active form of the breaker block
     public static final BooleanProperty ACTIVE = BooleanProperty.of("active");
 
     public BreakerBlock(Settings settings) {
@@ -37,8 +40,26 @@ public class BreakerBlock extends FacingBlock implements BlockEntityProvider {
     }
 
     @Override
-    public BlockEntity createBlockEntity(BlockView blockView) {
-        return new BreakerBlockEntity();
+    public MapCodec<BreakerBlock> getCodec() {
+        return CODEC;
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return world.isClient ? null : validateTicker(type, SyrencyMod.BREAKER_BLOCK_ENTITY, BreakerBlockEntity::serverTick);
+    }
+
+    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> validateTicker(
+            BlockEntityType<A> givenType, BlockEntityType<E> expectedType, BlockEntityTicker<? super E> ticker
+    ) {
+        // this cast is fine here
+        return expectedType == givenType ? (BlockEntityTicker<A>) ticker : null;
+    }
+
+    @Override
+    public BlockEntity createBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new BreakerBlockEntity(blockPos, blockState);
     }
 
     @Override
@@ -62,17 +83,14 @@ public class BreakerBlock extends FacingBlock implements BlockEntityProvider {
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
-                              BlockHitResult hit) {
-        if (!world.isClient) {
-            //player.sendMessage(new LiteralText("You used this block!!"), false);
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (world.isClient)
+            return ActionResult.SUCCESS;
 
-            NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
+        NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
 
-            if (screenHandlerFactory != null) {
-                //player.sendMessage(new LiteralText("Opened screen"), false);
-                player.openHandledScreen(screenHandlerFactory);
-            }
+        if (screenHandlerFactory != null) {
+            player.openHandledScreen(screenHandlerFactory);
         }
 
         return ActionResult.CONSUME;

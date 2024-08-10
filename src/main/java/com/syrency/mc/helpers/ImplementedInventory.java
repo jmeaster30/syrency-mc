@@ -49,13 +49,7 @@ public interface ImplementedInventory extends Inventory {
      */
     @Override
     default boolean isEmpty() {
-        for (int i = 0; i < size(); i++) {
-            ItemStack stack = getStack(i);
-            if (!stack.isEmpty()) {
-                return false;
-            }
-        }
-        return true;
+        return getItems().stream().allMatch(ItemStack::isEmpty);
     }
 
     /**
@@ -103,9 +97,7 @@ public interface ImplementedInventory extends Inventory {
     @Override
     default void setStack(int slot, ItemStack stack) {
         getItems().set(slot, stack);
-        if (stack.getCount() > getMaxCountPerStack()) {
-            stack.setCount(getMaxCountPerStack());
-        }
+        stack.capCount(stack.getMaxCount());
     }
 
     default ItemStack addStack(int slot, ItemStack stack) {
@@ -117,25 +109,19 @@ public interface ImplementedInventory extends Inventory {
             return null;
         }
 
-        if (toAdd.isItemEqual(current)) {
+        if (toAdd.isOf(current.getItem())) {
             int max = current.getMaxCount();
             int currentSize = current.getCount();
             int toAddSize = toAdd.getCount();
 
-            if (toAddSize + currentSize <= max) {
-                current.setCount(toAddSize + currentSize);
-                markDirty();
-                return null;
-            } else {
-                current.setCount(max);
-                toAdd.setCount(toAddSize - (max - currentSize));
-                markDirty();
-                return toAdd;
-            }
-        } else {
-            markDirty();
-            return toAdd;
+            current.setCount(Math.min(max, toAddSize + currentSize));
+            toAdd.setCount(toAddSize - (max - currentSize));
+
+            if (toAdd.getCount() <= 0)
+                toAdd = null;
         }
+        markDirty();
+        return toAdd;
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.syrency.mc.blockentities;
 
 import com.syrency.mc.SyrencyMod;
+import com.syrency.mc.blocks.AutoCrafterBlock;
 import com.syrency.mc.blocks.BreakerBlock;
 import com.syrency.mc.helpers.ImplementedInventory;
 import com.syrency.mc.screens.BreakerScreenHandler;
@@ -12,6 +13,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
@@ -20,45 +23,36 @@ import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BreakerBlockEntity extends BlockEntity
-        implements ImplementedInventory, NamedScreenHandlerFactory, Tickable {
-
-    // call "markDirty()" when changes are made to this block so the world will
-    // properly save the changes
+public class BreakerBlockEntity extends BlockEntity implements ImplementedInventory, NamedScreenHandlerFactory {
+    private static final int BREAKER_MAX_COOLDOWN = 4;
 
     private final DefaultedList<ItemStack> items = DefaultedList.ofSize(9, ItemStack.EMPTY);
+    private int breakerCooldown = -1;
 
-    private int actionDelay = 4;
-    private boolean activated = false;
-
-    public BreakerBlockEntity() {
-        super(SyrencyMod.BREAKER_BLOCK_ENTITY);
+    public BreakerBlockEntity(BlockPos blockPos, BlockState blockState)
+    {
+        super(SyrencyMod.BREAKER_BLOCK_ENTITY, blockPos, blockState);
     }
 
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
-        super.toTag(tag);
-
-        Inventories.toTag(tag, items);
-
-        tag.putInt("actionDelay", actionDelay);
-        tag.putBoolean("activated", activated);
-
-        return tag;
+    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registry)
+    {
+        super.readNbt(nbt, registry);
+        Inventories.readNbt(nbt, items, registry);
+        this.breakerCooldown = nbt.getInt("breakerCooldown");
     }
 
     @Override
-    public void fromTag(BlockState state, CompoundTag tag) {
-        super.fromTag(state, tag);
-
-        Inventories.fromTag(tag, items);
-
-        actionDelay = tag.getInt("actionDelay");
-        activated = tag.getBoolean("activated");
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registry)
+    {
+        super.writeNbt(nbt, registry);
+        Inventories.writeNbt(nbt, items, registry);
+        nbt.putInt("breakerCooldown", this.breakerCooldown);
     }
 
     @Override
@@ -66,9 +60,9 @@ public class BreakerBlockEntity extends BlockEntity
         return items;
     }
 
-    // returns the left over items that wer not added
+    // returns the leftover items that were not added
     public List<ItemStack> addToInventory(List<ItemStack> toAdd) {
-        List<ItemStack> notAdded = new ArrayList<ItemStack>();
+        List<ItemStack> notAdded = new ArrayList<>();
 
         for (ItemStack itemStack : toAdd) {
             ItemStack leftovers = itemStack;
@@ -93,56 +87,58 @@ public class BreakerBlockEntity extends BlockEntity
 
     @Override
     public Text getDisplayName() {
-        return new TranslatableText(getCachedState().getBlock().getTranslationKey());
+        return Text.translatable(getCachedState().getBlock().getTranslationKey());
     }
 
-    @Override
-    public void tick() {
-        if (actionDelay == 0) {
-            BlockState thisState = world.getBlockState(pos);
-            Direction facing = thisState.get(Properties.FACING);
-            BlockPos inFront = pos.add(facing.getVector());
+    public boolean needsCooldown()
+    {
+        return this.breakerCooldown > 0;
+    }
 
-            BlockState breakingState = world.getBlockState(inFront);
-            Block breakingBlock = breakingState.getBlock();
-            if (breakingBlock.is(Blocks.BEDROCK)) {
-                actionDelay = 4;
-                world.setBlockState(pos, thisState.with(BreakerBlock.ACTIVE, false));
-                return;
-            }
+    public void setCooldown(int cooldown)
+    {
+        this.breakerCooldown = cooldown;
+    }
 
-            BlockEntity breakingEntity = breakingBlock.hasBlockEntity() ? world.getBlockEntity(inFront) : null;
+    public static void serverTick(World world, BlockPos blockPos, BlockState blockState, BreakerBlockEntity breakerBlockEntity) {
+        if (!(world instanceof ServerWorld))
+            return;
 
-            List<ItemStack> droppedStacks = new ArrayList<ItemStack>();
-            if (world instanceof ServerWorld) {
-                droppedStacks = Block.getDroppedStacks(breakingState, (ServerWorld) world, inFront, breakingEntity);
-            }
+        // TODO I took this from AutoCrafterBlockEntity and it can be used to turn off the breaker block's active state
+        //--breakerBlockEntity.breakActiveCooldown;
+        //if (breakerBlockEntity.breakActiveCooldown == 0) {
+        //    world.setBlockState(blockPos, blockState.with(AutoCrafterBlock.CRAFTING, Boolean.FALSE), Block.NOTIFY_ALL);
+        //}
 
-            List<ItemStack> leftovers = addToInventory(droppedStacks);
-            leftovers.forEach((itemStack) -> {
-                Block.dropStack(world, pos, itemStack);
-            });
+        --breakerBlockEntity.breakerCooldown;
+        if (breakerBlockEntity.needsCooldown()) {
+            breakerBlockEntity.setCooldown(0);
+            breakerBlockEntity.tryBreak((ServerWorld)world);
+        }
+    }
 
-            int maxUpdateDepth = 64;
+    public void tryBreak(ServerWorld world)
+    {
+        Direction facingDirection = this.getCachedState().get(Properties.FACING);
+        BlockPos inFront = pos.add(facingDirection.getVector());
+        BlockState stateOfBlockToBreak = world.getBlockState(inFront);
 
-            world.breakBlock(inFront, false, null, maxUpdateDepth);
-            actionDelay = 4;
-            world.setBlockState(pos, thisState.with(BreakerBlock.ACTIVE, false));
+        // negative hardness seems to be associated with non-mine-able blocks
+        if (!stateOfBlockToBreak.hasBlockEntity()
+                || stateOfBlockToBreak.isAir()
+                || stateOfBlockToBreak.getHardness(world, pos) < 0
+                || !world.isReceivingRedstonePower(pos)) {
+            return;
         }
 
-        if (actionDelay < 4) {
-            actionDelay -= 1;
-        }
+        BlockEntity breakingEntity = world.getBlockEntity(inFront);
+        List<ItemStack> droppedStacks = Block.getDroppedStacks(stateOfBlockToBreak, world, inFront, breakingEntity);
 
-        if (world.isReceivingRedstonePower(pos) && actionDelay == 4 && !activated) {
-            actionDelay -= 1;
-            activated = true;
-            BlockState thisState = world.getBlockState(pos);
-            world.setBlockState(pos, thisState.with(BreakerBlock.ACTIVE, true));
-        }
+        List<ItemStack> leftovers = addToInventory(droppedStacks);
+        leftovers.forEach((itemStack) -> Block.dropStack(world, pos, itemStack));
 
-        if (!world.isReceivingRedstonePower(pos) && actionDelay == 4) {
-            activated = false;
-        }
+        int maxUpdateDepth = 64;
+        world.breakBlock(inFront, false, null, maxUpdateDepth);
+        setCooldown(BREAKER_MAX_COOLDOWN);
     }
 }
