@@ -88,11 +88,8 @@ public class PlacerBlock extends FacingBlock implements BlockEntityProvider {
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (state.getBlock() != newState.getBlock()) {
-
-            BlockEntity blockEntity = world.getBlockEntity(pos);
-
-            if (blockEntity instanceof PlacerBlockEntity) {
-                ItemScatterer.spawn(world, pos, (PlacerBlockEntity) blockEntity);
+            if (world.getBlockEntity(pos) instanceof PlacerBlockEntity placerBlockEntity) {
+                ItemScatterer.spawn(world, pos, placerBlockEntity);
                 world.updateComparators(pos, this);
             }
 

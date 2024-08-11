@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 
 public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEntity implements Hopper {
     private static final int[][] AVAILABLE_SLOTS_CACHE = new int[54][];
@@ -54,6 +55,11 @@ public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEn
             blockEntity.setTransferCooldown(0);
             insertAndExtract(world, pos, state, blockEntity, () -> extract(world, blockEntity, blockEntity.ItemTransferSize));
         }
+    }
+
+    // TODO actually use this function in here. Need some moving around to pick the item stack first
+    protected Direction getOutputDirection(ItemStack toMove) {
+        return facing;
     }
 
     private static <T extends AbstractHopperBlockEntity> boolean insertAndExtract(World world, BlockPos pos, BlockState state, T blockEntity, BooleanSupplier booleanSupplier) {
@@ -244,6 +250,7 @@ public abstract class AbstractHopperBlockEntity extends LootableContainerBlockEn
     }
 
     private static boolean canExtract(Inventory hopperInventory, Inventory fromInventory, ItemStack stack, int slot, Direction facing) {
+        // TODO can use teh output direction here as well
         if (!fromInventory.canTransferTo(hopperInventory, slot, stack)) {
             return false;
         } else {

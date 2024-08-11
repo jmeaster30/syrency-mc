@@ -32,7 +32,7 @@ public class DefaultedListCollector<T> implements Collector<T, DefaultedList<T>,
 
     @Override
     public Function<DefaultedList<T>, DefaultedList<T>> finisher() {
-        return (x) -> x;
+        return Function.identity();
     }
 
     @Override

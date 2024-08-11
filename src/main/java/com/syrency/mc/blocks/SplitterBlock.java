@@ -1,60 +1,55 @@
 package com.syrency.mc.blocks;
 
+import com.mojang.serialization.MapCodec;
+import com.syrency.mc.SyrencyMod;
+import com.syrency.mc.Utils;
+import com.syrency.mc.blockentities.PlacerBlockEntity;
 import com.syrency.mc.blockentities.SplitterBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.pathing.NavigationType;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.enums.Orientation;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
+import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.stat.Stats;
 import net.minecraft.state.StateManager.Builder;
-import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 public class SplitterBlock extends BlockWithEntity {
-    public static final BooleanProperty ENABLED = BooleanProperty.of("enabled");
+    public static final MapCodec<SplitterBlock> CODEC = createCodec(SplitterBlock::new);
 
     public SplitterBlock(Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(ENABLED, true));
+        this.setDefaultState(this.stateManager.getDefaultState().with(Properties.ORIENTATION, Orientation.NORTH_UP));
     }
 
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return this.getDefaultState().with(ENABLED, true);
+    @Override
+    public MapCodec<SplitterBlock> getCodec() { return CODEC; }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return world.isClient ? null : Utils.validateTicker(type, SyrencyMod.SPLITTER_ENTITY, SplitterBlockEntity::serverTick);
     }
 
-    public BlockEntity createBlockEntity(BlockView world) {
-        return new SplitterBlockEntity();
+    @Override
+    public BlockEntity createBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new SplitterBlockEntity(blockPos, blockState);
     }
 
-    public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-        if (itemStack.hasCustomName()) {
-            BlockEntity blockEntity = world.getBlockEntity(pos);
-            if (blockEntity instanceof SplitterBlockEntity) {
-                ((SplitterBlockEntity) blockEntity).setCustomName(itemStack.getName());
-            }
-        }
-    }
-
-    public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-        if (!oldState.isOf(state.getBlock())) {
-            this.updateEnabled(world, pos, state);
-        }
-    }
-
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    @Override
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (world.isClient) {
             return ActionResult.SUCCESS;
         } else {
@@ -68,22 +63,10 @@ public class SplitterBlock extends BlockWithEntity {
         }
     }
 
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
-        this.updateEnabled(world, pos, state);
-    }
-
-    private void updateEnabled(World world, BlockPos pos, BlockState state) {
-        boolean bl = !world.isReceivingRedstonePower(pos);
-        if (bl != state.get(ENABLED)) {
-            world.setBlockState(pos, state.with(ENABLED, bl), 4);
-        }
-    }
-
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.isOf(newState.getBlock())) {
-            BlockEntity blockEntity = world.getBlockEntity(pos);
-            if (blockEntity instanceof SplitterBlockEntity) {
-                ItemScatterer.spawn(world, pos, (SplitterBlockEntity) blockEntity);
+            if (world.getBlockEntity(pos) instanceof SplitterBlockEntity splitterBlockEntity) {
+                ItemScatterer.spawn(world, pos, splitterBlockEntity);
                 world.updateComparators(pos, this);
             }
 
@@ -95,26 +78,16 @@ public class SplitterBlock extends BlockWithEntity {
         return BlockRenderType.MODEL;
     }
 
+    public NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        return blockEntity instanceof NamedScreenHandlerFactory ? (NamedScreenHandlerFactory) blockEntity : null;
+    }
+
     public boolean hasComparatorOutput(BlockState state) {
         return false;
     }
 
     public int getComparatorOutput(BlockState state, World world, BlockPos pos) {
         return 0;
-    }
-
-    protected void appendProperties(Builder<Block, BlockState> builder) {
-        builder.add(ENABLED);
-    }
-
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof SplitterBlockEntity) {
-            ((SplitterBlockEntity) blockEntity).onEntityCollided(entity);
-        }
-    }
-
-    public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
-        return false;
     }
 }

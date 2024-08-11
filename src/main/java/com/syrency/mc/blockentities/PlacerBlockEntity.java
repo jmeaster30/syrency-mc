@@ -1,13 +1,10 @@
 package com.syrency.mc.blockentities;
 
 import com.syrency.mc.SyrencyMod;
-import com.syrency.mc.blocks.PlacerBlock;
-import com.syrency.mc.functions.Functional;
 import com.syrency.mc.helpers.ImplementedInventory;
 import com.syrency.mc.screens.PlacerScreenHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -71,27 +68,6 @@ public class PlacerBlockEntity extends BlockEntity
     @Override
     public Text getDisplayName() {
         return Text.translatable(getCachedState().getBlock().getTranslationKey());
-    }
-
-    @Override
-    public void tick() {
-        if (actionDelay == 0) {
-            }
-
-        if (actionDelay < 4) {
-            actionDelay -= 1;
-        }
-
-        if (world.isReceivingRedstonePower(pos) && actionDelay == 4 && !activated) {
-            actionDelay -= 1;
-            activated = true;
-            BlockState thisState = world.getBlockState(pos);
-            world.setBlockState(pos, thisState.with(PlacerBlock.ACTIVE, true));
-        }
-
-        if (!world.isReceivingRedstonePower(pos) && actionDelay == 4) {
-            activated = false;
-        }
     }
 
     public boolean needsCooldown()

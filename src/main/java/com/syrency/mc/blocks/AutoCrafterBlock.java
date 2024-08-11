@@ -12,7 +12,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ItemScatterer;
@@ -24,11 +23,10 @@ import org.jetbrains.annotations.Nullable;
 public class AutoCrafterBlock extends BlockWithEntity {
     public static final MapCodec<AutoCrafterBlock> CODEC = createCodec(AutoCrafterBlock::new);
     public static final BooleanProperty CRAFTING = Properties.CRAFTING;
-    private static final EnumProperty<Orientation> ORIENTATION = Properties.ORIENTATION;
 
     public AutoCrafterBlock(Settings settings) {
         super(settings);
-        setDefaultState(getStateManager().getDefaultState().with(ORIENTATION, Orientation.NORTH_UP).with(CRAFTING, Boolean.FALSE));
+        setDefaultState(getStateManager().getDefaultState().with(Properties.ORIENTATION, Orientation.NORTH_UP).with(CRAFTING, Boolean.FALSE));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.syrency.mc;
 
 import com.syrency.mc.helpers.DefaultedListCollector;
+import com.syrency.mc.helpers.SelectRandomCollector;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
@@ -11,6 +12,8 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.collection.DefaultedList;
 
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collector;
 
 public class Utils {
@@ -55,6 +58,10 @@ public class Utils {
 
     public static <T> Collector<T, ?, DefaultedList<T>> toDefaultedList() {
         return new DefaultedListCollector<>();
+    }
+
+    public static <T> Collector<T, ?, Optional<T>> selectRandom(Random rng) {
+        return new SelectRandomCollector<>(rng);
     }
 
     public static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> validateTicker(
