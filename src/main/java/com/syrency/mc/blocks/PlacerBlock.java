@@ -1,8 +1,13 @@
 package com.syrency.mc.blocks;
 
+import com.mojang.serialization.MapCodec;
+import com.syrency.mc.SyrencyMod;
+import com.syrency.mc.Utils;
 import com.syrency.mc.blockentities.PlacerBlockEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.screen.NamedScreenHandlerFactory;
@@ -11,18 +16,17 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 public class PlacerBlock extends FacingBlock implements BlockEntityProvider {
 
-    // warning we are not changing this at all and we didn't set up the different
-    // variants for the model
+    public static final MapCodec<PlacerBlock> CODEC = createCodec(PlacerBlock::new);
+    // TODO actually change this properly and make it change to the active form of the placer block
     public static final BooleanProperty ACTIVE = BooleanProperty.of("active");
 
     public PlacerBlock(Settings settings) {
@@ -37,8 +41,17 @@ public class PlacerBlock extends FacingBlock implements BlockEntityProvider {
     }
 
     @Override
-    public BlockEntity createBlockEntity(BlockView blockView) {
-        return new PlacerBlockEntity();
+    public MapCodec<PlacerBlock> getCodec() { return CODEC; }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return world.isClient ? null : Utils.validateTicker(type, SyrencyMod.PLACER_BLOCK_ENTITY, PlacerBlockEntity::serverTick);
+    }
+
+    @Override
+    public BlockEntity createBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new PlacerBlockEntity(blockPos, blockState);
     }
 
     @Override
@@ -62,19 +75,13 @@ public class PlacerBlock extends FacingBlock implements BlockEntityProvider {
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
-                              BlockHitResult hit) {
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (!world.isClient) {
-            //player.sendMessage(new LiteralText("You used this block!!"), false);
-
             NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
-
             if (screenHandlerFactory != null) {
-                //player.sendMessage(new LiteralText("Opened screen"), false);
                 player.openHandledScreen(screenHandlerFactory);
             }
         }
-
         return ActionResult.CONSUME;
     }
 

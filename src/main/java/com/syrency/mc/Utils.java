@@ -1,6 +1,9 @@
 package com.syrency.mc;
 
 import com.syrency.mc.helpers.DefaultedListCollector;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -52,5 +55,12 @@ public class Utils {
 
     public static <T> Collector<T, ?, DefaultedList<T>> toDefaultedList() {
         return new DefaultedListCollector<>();
+    }
+
+    public static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> validateTicker(
+            BlockEntityType<A> givenType, BlockEntityType<E> expectedType, BlockEntityTicker<? super E> ticker
+    ) {
+        // this cast is fine here
+        return expectedType == givenType ? (BlockEntityTicker<A>) ticker : null;
     }
 }

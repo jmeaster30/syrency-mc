@@ -2,6 +2,7 @@ package com.syrency.mc.blocks;
 
 import com.mojang.serialization.MapCodec;
 import com.syrency.mc.SyrencyMod;
+import com.syrency.mc.Utils;
 import com.syrency.mc.blockentities.BreakerBlockEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -47,14 +48,7 @@ public class BreakerBlock extends FacingBlock implements BlockEntityProvider {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return world.isClient ? null : validateTicker(type, SyrencyMod.BREAKER_BLOCK_ENTITY, BreakerBlockEntity::serverTick);
-    }
-
-    protected static <E extends BlockEntity, A extends BlockEntity> BlockEntityTicker<A> validateTicker(
-            BlockEntityType<A> givenType, BlockEntityType<E> expectedType, BlockEntityTicker<? super E> ticker
-    ) {
-        // this cast is fine here
-        return expectedType == givenType ? (BlockEntityTicker<A>) ticker : null;
+        return world.isClient ? null : Utils.validateTicker(type, SyrencyMod.BREAKER_BLOCK_ENTITY, BreakerBlockEntity::serverTick);
     }
 
     @Override
