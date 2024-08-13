@@ -16,15 +16,13 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.syrency.mc.SyrencyMod"
+      "com.syrency.mc.server.SyrencyMod"
     ],
     "client": [
-      "com.syrency.mc.SyrencyClientMod"
+      "com.syrency.mc.client.SyrencyClientMod"
     ]
   },
-  "mixins": [
-    "modid.mixins.json"
-  ],
+  "mixins": [],
   "depends": {
     "fabricloader": ">=0.101.2",
     "fabric": "*",
