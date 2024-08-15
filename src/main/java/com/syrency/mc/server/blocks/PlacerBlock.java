@@ -26,17 +26,17 @@ import org.jetbrains.annotations.Nullable;
 public class PlacerBlock extends FacingBlock implements BlockEntityProvider {
 
     public static final MapCodec<PlacerBlock> CODEC = createCodec(PlacerBlock::new);
-    // TODO actually change this properly and make it change to the active form of the placer block
     public static final BooleanProperty ACTIVE = BooleanProperty.of("active");
 
     public PlacerBlock(Settings settings) {
         super(settings);
-        setDefaultState(getStateManager().getDefaultState().with(Properties.FACING, Direction.NORTH).with(ACTIVE, false));
+        setDefaultState(getStateManager().getDefaultState().with(Properties.FACING, Direction.NORTH).with(Properties.ENABLED, false).with(ACTIVE, false));
     }
 
     @Override
     public void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
         stateManager.add(ACTIVE);
+        stateManager.add(Properties.ENABLED);
         stateManager.add(Properties.FACING);
     }
 

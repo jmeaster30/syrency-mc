@@ -1,6 +1,7 @@
 package com.syrency.mc.server.blockentities;
 
 import com.syrency.mc.server.SyrencyMod;
+import com.syrency.mc.server.blocks.PlacerBlock;
 import com.syrency.mc.utilities.ImplementedInventory;
 import com.syrency.mc.server.screens.PlacerScreenHandler;
 import net.minecraft.block.Block;
@@ -81,13 +82,21 @@ public class PlacerBlockEntity extends BlockEntity
     }
 
     public static void serverTick(World world, BlockPos blockPos, BlockState blockState, PlacerBlockEntity placerBlockEntity) {
-        if (!(world instanceof ServerWorld))
+        if (!(world instanceof ServerWorld serverWorld))
             return;
 
+        if (!world.isReceivingRedstonePower(placerBlockEntity.getPos()))
+            world.setBlockState(placerBlockEntity.getPos(), blockState
+                    .with(Properties.ENABLED, false)
+                    .with(PlacerBlock.ACTIVE, false));
+
+        if (!blockState.get(Properties.ENABLED) && world.isReceivingRedstonePower(placerBlockEntity.getPos()))
+            world.setBlockState(placerBlockEntity.getPos(), blockState.with(Properties.ENABLED, true));
+
         --placerBlockEntity.placingCooldown;
-        if (placerBlockEntity.needsCooldown()) {
+        if (!placerBlockEntity.needsCooldown() && blockState.get(Properties.ENABLED) && !blockState.get(PlacerBlock.ACTIVE)) {
             placerBlockEntity.setCooldown(0);
-            placerBlockEntity.tryPlace((ServerWorld) world, blockState);
+            placerBlockEntity.tryPlace(serverWorld, blockState);
         }
     }
 
@@ -96,11 +105,7 @@ public class PlacerBlockEntity extends BlockEntity
         Direction facing = blockState.get(Properties.FACING);
         BlockPos inFront = pos.add(facing.getVector());
 
-        if (!world.isReceivingRedstonePower(pos))
-            return;
-
-        //if there is a block in front of the placer do nothing
-        BlockState toReplaceBlockState = world.getBlockState(inFront);
+        world.setBlockState(pos, blockState.with(PlacerBlock.ACTIVE, true));
 
         //if there is a block in front of the placer do nothing
         BlockState frontState = world.getBlockState(inFront);
@@ -125,8 +130,6 @@ public class PlacerBlockEntity extends BlockEntity
         }
 
         itemStackToPlace.decrement(1);
-
         setCooldown(PLACER_COOLDOWN);
-        //world.setBlockState(pos, blockState.with(PlacerBlock.ACTIVE, false));
     }
 }
