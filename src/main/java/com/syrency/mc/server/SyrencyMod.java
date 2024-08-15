@@ -4,11 +4,15 @@ import com.syrency.mc.server.blockentities.*;
 import com.syrency.mc.server.blocks.*;
 import com.syrency.mc.server.screens.*;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemGroups;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Identifier;
@@ -99,5 +103,14 @@ public class SyrencyMod implements ModInitializer {
     @Override
     public void onInitialize() {
         System.out.println("Syrency initialized :)");
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.REDSTONE).register(groupEntries -> {
+            groupEntries.add(BREAKER_BLOCK_ITEM);
+            groupEntries.add(AUTOCRAFTER_BLOCK_ITEM);
+            groupEntries.add(PLACER_BLOCK_ITEM);
+            groupEntries.add(FAST_HOPPER_ITEM);
+            groupEntries.add(HUPPER_ITEM);
+            groupEntries.add(SPLITTER_ITEM);
+            groupEntries.add(GROWTH_DETECTOR_ITEM);
+        });
     }
 }

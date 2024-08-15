@@ -67,11 +67,13 @@ public class BreakerBlock extends FacingBlock implements BlockEntityProvider {
         return blockEntity != null && blockEntity.onSyncedBlockEvent(type, data);
     }
 
+    @Override
     public NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         return blockEntity instanceof NamedScreenHandlerFactory ? (NamedScreenHandlerFactory) blockEntity : null;
     }
 
+    @Override
     public BlockState getPlacementState(ItemPlacementContext ctxt) {
         return this.getDefaultState().with(FACING, ctxt.getPlayerLookDirection());
     }

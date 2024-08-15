@@ -45,7 +45,8 @@ public class Utils {
 
     public static void writeItemStackNbt(NbtCompound nbt, String key, ItemStack stack, RegistryWrapper.WrapperLookup registries)
     {
-        nbt.put(key, stack.encode(registries));
+        if (!stack.isEmpty())
+            nbt.put(key, stack.encode(registries));
     }
 
     public static ItemStack readItemStackNbt(NbtCompound nbt, String key, RegistryWrapper.WrapperLookup registries)

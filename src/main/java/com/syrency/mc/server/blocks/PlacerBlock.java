@@ -59,17 +59,20 @@ public class PlacerBlock extends FacingBlock implements BlockEntityProvider {
         return BlockRenderType.MODEL;
     }
 
+    @Override
     public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
         super.onSyncedBlockEvent(state, world, pos, type, data);
         BlockEntity blockEntity = world.getBlockEntity(pos);
         return blockEntity != null && blockEntity.onSyncedBlockEvent(type, data);
     }
 
+    @Override
     public NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         return blockEntity instanceof NamedScreenHandlerFactory ? (NamedScreenHandlerFactory) blockEntity : null;
     }
 
+    @Override
     public BlockState getPlacementState(ItemPlacementContext ctxt) {
         return this.getDefaultState().with(FACING, ctxt.getPlayerLookDirection());
     }

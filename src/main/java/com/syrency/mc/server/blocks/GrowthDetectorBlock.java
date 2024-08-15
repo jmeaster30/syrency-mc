@@ -61,7 +61,7 @@ public class GrowthDetectorBlock extends FacingBlock implements BlockEntityProvi
 
         BlockState lookingState = world.getBlockState(inFront);
 
-        Integer originalPower = state.get(Properties.POWER);
+        Integer originalPower = state.get(POWER);
         Integer plantAge = getBlockStateAge(lookingState);
 
         if (plantAge == null && originalPower == 0)
@@ -71,7 +71,7 @@ public class GrowthDetectorBlock extends FacingBlock implements BlockEntityProvi
             plantAge = -1;
 
         int newPower = plantAge + 1;
-        if (originalPower != newPower)
+        if (originalPower == newPower)
             return;
 
         world.setBlockState(pos, thisState.with(GrowthDetectorBlock.POWER, newPower));
@@ -99,7 +99,6 @@ public class GrowthDetectorBlock extends FacingBlock implements BlockEntityProvi
         }
     }
 
-
     protected void updateNeighbors(World world, BlockPos pos, BlockState state) {
         Direction direction = state.get(FACING);
         BlockPos blockPos = pos.offset(direction.getOpposite());
@@ -112,23 +111,42 @@ public class GrowthDetectorBlock extends FacingBlock implements BlockEntityProvi
         return BlockRenderType.MODEL;
     }
 
+    @Override
     public boolean onSyncedBlockEvent(BlockState state, World world, BlockPos pos, int type, int data) {
         super.onSyncedBlockEvent(state, world, pos, type, data);
         BlockEntity blockEntity = world.getBlockEntity(pos);
         return blockEntity != null && blockEntity.onSyncedBlockEvent(type, data);
     }
 
+    @Override
     public BlockState getPlacementState(ItemPlacementContext ctxt) {
         return this.getDefaultState().with(FACING, ctxt.getPlayerLookDirection());
     }
 
+    @Override
     public boolean emitsRedstonePower(BlockState state) {
         return true;
     }
 
+    @Override
+    protected int getStrongRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
+        return this.getWeakRedstonePower(state, world, pos, direction);
+    }
+
+    @Override
     public int getWeakRedstonePower(BlockState state, BlockView world, BlockPos pos, Direction direction) {
         boolean behind = state.get(Properties.FACING).equals(direction);
-        return behind ? state.get(POWER) : 0;
+        return behind ? state.getOrEmpty(POWER).orElse(0) : 0;
+    }
+
+    @Override
+    protected boolean hasComparatorOutput(BlockState state) {
+        return emitsRedstonePower(state);
+    }
+
+    @Override
+    protected int getComparatorOutput(BlockState state, World world, BlockPos pos) {
+        return this.getWeakRedstonePower(state, world, pos, state.get(Properties.FACING));
     }
 
     @Nullable

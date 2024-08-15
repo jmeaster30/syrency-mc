@@ -9,6 +9,7 @@ import net.minecraft.block.entity.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.stat.Stats;
+import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
@@ -69,6 +70,7 @@ public class HupperBlock extends HopperBlock {
         this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.DOWN).with(ENABLED, true));
     }
 
+    @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return switch (state.get(FACING)) {
             case UP -> UP_SHAPE;
@@ -80,6 +82,7 @@ public class HupperBlock extends HopperBlock {
         };
     }
 
+    @Override
     public VoxelShape getRaycastShape(BlockState state, BlockView world, BlockPos pos) {
         return switch (state.get(FACING)) {
             case DOWN -> UP_RAY_TRACE_SHAPE;

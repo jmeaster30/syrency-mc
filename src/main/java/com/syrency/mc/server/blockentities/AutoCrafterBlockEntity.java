@@ -23,6 +23,7 @@ import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -34,8 +35,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.Map;
-
-import static com.syrency.mc.server.blocks.AutoCrafterBlock.CRAFTING;
 
 public class AutoCrafterBlockEntity extends LootableContainerBlockEntity implements RecipeInputInventory, SidedInventory, NamedScreenHandlerFactory {
 
@@ -276,7 +275,7 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
 
         --autoCrafterBlockEntity.craftCooldown;
         if (autoCrafterBlockEntity.craftCooldown == 0) {
-            world.setBlockState(blockPos, blockState.with(AutoCrafterBlock.CRAFTING, Boolean.FALSE), Block.NOTIFY_ALL);
+            world.setBlockState(blockPos, blockState.with(Properties.CRAFTING, Boolean.FALSE), Block.NOTIFY_ALL);
         }
 
         autoCrafterBlockEntity.lastTickTime = world.getTime();
@@ -348,7 +347,7 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
             return;
         }
 
-        world.setBlockState(pos, blockState.with(CRAFTING, Boolean.TRUE), Block.NOTIFY_LISTENERS);
+        world.setBlockState(pos, blockState.with(Properties.CRAFTING, Boolean.TRUE), Block.NOTIFY_LISTENERS);
         crafted.onCraftByCrafter(world);
 
         if (outputStack.isEmpty())

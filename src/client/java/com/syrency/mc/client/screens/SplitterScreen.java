@@ -3,6 +3,7 @@ package com.syrency.mc.client.screens;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.syrency.mc.server.SyrencyMod;
 import com.syrency.mc.server.screens.SplitterScreenHandler;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
@@ -15,22 +16,22 @@ public class SplitterScreen extends HandledScreen<SplitterScreenHandler> {
 
     public SplitterScreen(SplitterScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
-        this.passEvents = false;
         this.backgroundHeight = 182;
         this.playerInventoryTitleY = this.backgroundHeight - 94;
     }
 
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderBackground(matrices);
-        super.render(matrices, mouseX, mouseY, delta);
-        this.drawMouseoverTooltip(matrices, mouseX, mouseY);
+    @Override
+    public void render(DrawContext drawContext, int mouseX, int mouseY, float delta) {
+        this.renderBackground(drawContext, mouseX, mouseY, delta);
+        super.render(drawContext, mouseX, mouseY, delta);
+        this.drawMouseoverTooltip(drawContext, mouseX, mouseY);
     }
 
-    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.client.getTextureManager().bindTexture(TEXTURE);
+    @Override
+    protected void drawBackground(DrawContext drawContext, float delta, int mouseX, int mouseY) {
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         int i = (this.width - this.backgroundWidth) / 2;
         int j = (this.height - this.backgroundHeight) / 2;
-        this.drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        drawContext.drawTexture(TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
     }
 }
