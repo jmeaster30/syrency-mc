@@ -28,20 +28,20 @@ import java.util.Optional;
 
 import static java.util.function.Predicate.not;
 
-public class PlacerBlockEntity extends BlockEntity
-        implements ImplementedInventory, NamedScreenHandlerFactory {
-
+public class PlacerBlockEntity extends BlockEntity implements ImplementedInventory, NamedScreenHandlerFactory {
     private static final int PLACER_COOLDOWN = 4;
-    private final DefaultedList<ItemStack> items = DefaultedList.ofSize(9, ItemStack.EMPTY);
 
+    private final DefaultedList<ItemStack> items = DefaultedList.ofSize(9, ItemStack.EMPTY);
     private int placingCooldown = -1;
 
-    public PlacerBlockEntity(BlockPos blockPos, BlockState blockState) {
+    public PlacerBlockEntity(BlockPos blockPos, BlockState blockState)
+    {
         super(SyrencyMod.PLACER_BLOCK_ENTITY, blockPos, blockState);
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
+    {
         super.writeNbt(nbt, registryLookup);
 
         Inventories.writeNbt(nbt, this.items, registryLookup);
@@ -49,7 +49,8 @@ public class PlacerBlockEntity extends BlockEntity
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
+    {
         super.readNbt(nbt, registryLookup);
 
         Inventories.readNbt(nbt, this.items, registryLookup);
@@ -62,7 +63,8 @@ public class PlacerBlockEntity extends BlockEntity
     }
 
     @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player)
+    {
         return new PlacerScreenHandler(syncId, playerInventory, this);
     }
 

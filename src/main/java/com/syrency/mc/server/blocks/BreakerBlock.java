@@ -31,12 +31,13 @@ public class BreakerBlock extends FacingBlock implements BlockEntityProvider {
 
     public BreakerBlock(Settings settings) {
         super(settings);
-        setDefaultState(getStateManager().getDefaultState().with(Properties.FACING, Direction.NORTH).with(ACTIVE, false));
+        setDefaultState(getStateManager().getDefaultState().with(Properties.FACING, Direction.NORTH).with(Properties.ENABLED, false).with(ACTIVE, false));
     }
 
     @Override
     public void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
         stateManager.add(ACTIVE);
+        stateManager.add(Properties.ENABLED);
         stateManager.add(Properties.FACING);
     }
 

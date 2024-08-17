@@ -1,6 +1,7 @@
 package com.syrency.mc.server.blockentities;
 
 import com.syrency.mc.server.SyrencyMod;
+import com.syrency.mc.server.blocks.BreakerBlock;
 import com.syrency.mc.utilities.ImplementedInventory;
 import com.syrency.mc.server.screens.BreakerScreenHandler;
 import net.minecraft.block.Block;
@@ -98,37 +99,37 @@ public class BreakerBlockEntity extends BlockEntity implements ImplementedInvent
     }
 
     public static void serverTick(World world, BlockPos blockPos, BlockState blockState, BreakerBlockEntity breakerBlockEntity) {
-        if (!(world instanceof ServerWorld))
+        if (!(world instanceof ServerWorld serverWorld))
             return;
 
-        // TODO I took this from AutoCrafterBlockEntity and it can be used to turn off the breaker block's active state
-        //--breakerBlockEntity.breakActiveCooldown;
-        //if (breakerBlockEntity.breakActiveCooldown == 0) {
-        //    world.setBlockState(blockPos, blockState.with(AutoCrafterBlock.CRAFTING, Boolean.FALSE), Block.NOTIFY_ALL);
-        //}
+        if (!world.isReceivingRedstonePower(breakerBlockEntity.getPos()) && (blockState.get(Properties.ENABLED) || blockState.get(BreakerBlock.ACTIVE)))
+            world.setBlockState(breakerBlockEntity.getPos(), blockState
+                    .with(Properties.ENABLED, false)
+                    .with(BreakerBlock.ACTIVE, false));
+
+        if (!blockState.get(Properties.ENABLED) && world.isReceivingRedstonePower(breakerBlockEntity.getPos()))
+            world.setBlockState(breakerBlockEntity.getPos(), blockState.with(Properties.ENABLED, true));
 
         --breakerBlockEntity.breakerCooldown;
-        if (breakerBlockEntity.needsCooldown()) {
+        if (!breakerBlockEntity.needsCooldown() && blockState.get(Properties.ENABLED) && !blockState.get(BreakerBlock.ACTIVE)) {
             breakerBlockEntity.setCooldown(0);
-            breakerBlockEntity.tryBreak((ServerWorld)world);
+            breakerBlockEntity.tryBreak(serverWorld, blockState);
         }
     }
 
-    public void tryBreak(ServerWorld world)
+    public void tryBreak(ServerWorld world, BlockState blockState)
     {
         Direction facingDirection = this.getCachedState().get(Properties.FACING);
         BlockPos inFront = pos.add(facingDirection.getVector());
         BlockState stateOfBlockToBreak = world.getBlockState(inFront);
 
-        // negative hardness seems to be associated with non-mine-able blocks
-        if (!stateOfBlockToBreak.hasBlockEntity()
-                || stateOfBlockToBreak.isAir()
-                || stateOfBlockToBreak.getHardness(world, pos) < 0
-                || !world.isReceivingRedstonePower(pos)) {
-            return;
-        }
+        world.setBlockState(pos, blockState.with(BreakerBlock.ACTIVE, true));
 
-        BlockEntity breakingEntity = world.getBlockEntity(inFront);
+        // negative hardness seems to be associated with non-mine-able blocks
+        if (stateOfBlockToBreak.isAir() || stateOfBlockToBreak.getHardness(world, pos) < 0)
+            return;
+
+        BlockEntity breakingEntity = stateOfBlockToBreak.hasBlockEntity() ? world.getBlockEntity(inFront) : null;
         List<ItemStack> droppedStacks = Block.getDroppedStacks(stateOfBlockToBreak, world, inFront, breakingEntity);
 
         List<ItemStack> leftovers = addToInventory(droppedStacks);
