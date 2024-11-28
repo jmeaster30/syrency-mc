@@ -2,10 +2,8 @@ package com.syrency.mc.server.blockentities;
 
 import com.syrency.mc.server.SyrencyMod;
 import com.syrency.mc.utilities.Utils;
-import com.syrency.mc.server.blocks.AutoCrafterBlock;
 import com.syrency.mc.utilities.EntityCraftingInventory;
 import com.syrency.mc.server.screens.AutoCrafterScreenHandler;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,6 +34,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.Map;
 
+import static java.util.function.Predicate.not;
+
 public class AutoCrafterBlockEntity extends LootableContainerBlockEntity implements RecipeInputInventory, SidedInventory, NamedScreenHandlerFactory {
 
     private static final int CRAFTING_COOLDOWN = 4;
@@ -55,7 +55,6 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
     private ItemStack outputStack = ItemStack.EMPTY;
 
     private int craftCooldown = -1;
-    private long lastTickTime;
     private boolean activated = false;
 
     public AutoCrafterBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -82,7 +81,6 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
 
         this.outputStack = Utils.readItemStackNbt(nbt, "outputStack", registryLookup);
         this.craftCooldown = nbt.getInt("craftCooldown");
-        this.lastTickTime = nbt.getLong("lastTickTime");
         this.activated = nbt.getBoolean("activated");
     }
 
@@ -98,7 +96,6 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
         nbt.put("craftingTable", craftingTableNbt);
 
         nbt.putInt("craftCooldown", this.craftCooldown);
-        nbt.putLong("lastTickTime", this.lastTickTime);
         nbt.putBoolean("activated", this.activated);
     }
 
@@ -189,7 +186,7 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
     @Override
     public ItemStack getStack(int slot) {
         if (slot == 0) return outputStack;
-        if (slot <= CRAFTING_TABLE_SIZE + 1) return craftingTable.getStack(slot - 1);
+        if (slot <= CRAFTING_TABLE_SIZE) return craftingTable.getStack(slot - 1);
         return mainInventory.get(slot - CRAFTING_TABLE_SIZE - 1);
     }
 
@@ -206,15 +203,15 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
 
     @Override
     public ItemStack removeStack(int slot) {
-        ItemStack oldStack = null;
+        ItemStack oldStack;
         if (slot == 0) {
             oldStack = outputStack.copy();
             outputStack = ItemStack.EMPTY;
         }
-        if (slot <= CRAFTING_TABLE_SIZE + 1) {
+        else if (slot <= CRAFTING_TABLE_SIZE) {
             oldStack = craftingTable.removeStack(slot - 1);
         }
-        if (oldStack == null) {
+        else {
             oldStack = mainInventory.get(slot - CRAFTING_TABLE_SIZE - 1).copy();
             mainInventory.set(slot - CRAFTING_TABLE_SIZE - 1, ItemStack.EMPTY);
         }
@@ -223,10 +220,10 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
 
     @Override
     public ItemStack removeStack(int slot, int count) {
-        ItemStack result = null;
+        ItemStack result;
         if (slot == 0) result = outputStack.split(count);
-        if (slot <= CRAFTING_TABLE_SIZE + 1) result = craftingTable.splitStack(slot - 1, count);
-        if (result == null) result = Inventories.splitStack(mainInventory, slot - CRAFTING_TABLE_SIZE - 1, count);
+        else if (slot <= CRAFTING_TABLE_SIZE) result = craftingTable.splitStack(slot - 1, count);
+        else result = Inventories.splitStack(mainInventory, slot - CRAFTING_TABLE_SIZE - 1, count);
 
         if (!result.isEmpty()) {
             markDirty();
@@ -241,7 +238,7 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
         }
 
         if (slot == 0) outputStack = stack;
-        else if (slot <= CRAFTING_TABLE_SIZE + 1) craftingTable.setStack(slot - 1, stack);
+        else if (slot <= CRAFTING_TABLE_SIZE) craftingTable.setStack(slot - 1, stack);
         else mainInventory.set(slot - CRAFTING_TABLE_SIZE - 1, stack);
     }
 
@@ -270,18 +267,21 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
     }
 
     public static void serverTick(World world, BlockPos blockPos, BlockState blockState, AutoCrafterBlockEntity autoCrafterBlockEntity) {
-        if (!(world instanceof ServerWorld))
+        if (!(world instanceof ServerWorld serverWorld))
             return;
 
-        --autoCrafterBlockEntity.craftCooldown;
-        if (autoCrafterBlockEntity.craftCooldown == 0) {
-            world.setBlockState(blockPos, blockState.with(Properties.CRAFTING, Boolean.FALSE), Block.NOTIFY_ALL);
-        }
+        if (!world.isReceivingRedstonePower(blockPos) && (blockState.get(Properties.ENABLED) || blockState.get(Properties.CRAFTING)))
+            world.setBlockState(blockPos, blockState
+                    .with(Properties.ENABLED, false)
+                    .with(Properties.CRAFTING, false));
 
-        autoCrafterBlockEntity.lastTickTime = world.getTime();
-        if (autoCrafterBlockEntity.needsCooldown()) {
+        if (!blockState.get(Properties.ENABLED) && world.isReceivingRedstonePower(blockPos))
+            world.setBlockState(blockPos, blockState.with(Properties.ENABLED, true));
+
+        --autoCrafterBlockEntity.craftCooldown;
+        if (!autoCrafterBlockEntity.needsCooldown() && blockState.get(Properties.ENABLED) && !blockState.get(Properties.CRAFTING)) {
             autoCrafterBlockEntity.setCooldown(0);
-            autoCrafterBlockEntity.tryCraft((ServerWorld)world, blockState);
+            autoCrafterBlockEntity.tryCraft(serverWorld, blockState);
         }
     }
 
@@ -294,7 +294,8 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
     }
 
     public void removeStacks(DefaultedList<ItemStack> stacksToRemove) {
-        Map<Item, Long> removalItemCounts = stacksToRemove.stream().filter(x -> !x.isEmpty()).collect(Collectors.groupingBy(ItemStack::getItem, Collectors.mapping(ItemStack::getCount, Collectors.counting())));
+        Map<Item, Long> removalItemCounts = stacksToRemove.stream().filter(not(ItemStack::isEmpty)) //
+                .collect(Collectors.groupingBy(ItemStack::getItem, Collectors.summingLong(ItemStack::getCount)));
 
         for (int i = 0; i < INVENTORY_SIZE; i++) {
             ItemStack currentItemStack = this.mainInventory.get(i);
@@ -319,8 +320,6 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
 
     public void tryCraft(ServerWorld world, BlockState blockState) {
         CraftingRecipeInput recipeInput = this.craftingTable.createRecipeInput();
-        if (world.isReceivingRedstonePower(pos))
-            return;
 
         Optional<RecipeEntry<CraftingRecipe>> optionalCraftingRecipe = recipeCache.getRecipe(world, recipeInput);
         if (optionalCraftingRecipe.isEmpty()) {
@@ -347,7 +346,7 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
             return;
         }
 
-        world.setBlockState(pos, blockState.with(Properties.CRAFTING, Boolean.TRUE), Block.NOTIFY_LISTENERS);
+        world.setBlockState(pos, blockState.with(Properties.CRAFTING, Boolean.TRUE));
         crafted.onCraftByCrafter(world);
 
         if (outputStack.isEmpty())
@@ -356,6 +355,7 @@ public class AutoCrafterBlockEntity extends LootableContainerBlockEntity impleme
             outputStack.setCount(outputStack.getCount() + crafted.getCount());
 
         setCooldown(CRAFTING_COOLDOWN);
+
         removeStacks(neededRecipeStacks);
 
         world.syncWorldEvent(WorldEvents.CRAFTER_CRAFTS, pos, 0);

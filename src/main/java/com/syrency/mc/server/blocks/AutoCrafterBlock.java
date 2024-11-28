@@ -12,7 +12,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ItemScatterer;
@@ -26,7 +25,7 @@ public class AutoCrafterBlock extends BlockWithEntity {
 
     public AutoCrafterBlock(Settings settings) {
         super(settings);
-        setDefaultState(getStateManager().getDefaultState().with(Properties.ORIENTATION, Orientation.NORTH_UP).with(Properties.CRAFTING, Boolean.FALSE));
+        setDefaultState(getStateManager().getDefaultState().with(Properties.ORIENTATION, Orientation.NORTH_UP).with(Properties.CRAFTING, Boolean.FALSE).with(Properties.ENABLED, Boolean.FALSE));
     }
 
     @Override
@@ -34,6 +33,7 @@ public class AutoCrafterBlock extends BlockWithEntity {
         super.appendProperties(builder);
         builder.add(Properties.ORIENTATION);
         builder.add(Properties.CRAFTING);
+        builder.add(Properties.ENABLED);
     }
 
     @Override

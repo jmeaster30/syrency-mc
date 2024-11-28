@@ -27,9 +27,10 @@ import java.util.Optional;
 
 public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<CraftingRecipeInput, CraftingRecipe> {
 
-    private final Inventory inventory;
-    private final CraftingInventory input;
-    private final CraftingResultInventory result;
+    private final Inventory inventory; // full 37 slot inventory
+    private final CraftingInventory input; // 9 slot crafting space
+    private final CraftingResultInventory result; // 1 slot result
+
     private final ScreenHandlerContext context;
     private final PlayerEntity player;
 
@@ -44,7 +45,7 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
         super(SyrencyMod.AUTOCRAFTER_SCREEN_HANDLER, syncId);
         checkSize(inventory, 37);
         this.inventory = inventory;
-        inventory.onOpen(playerInventory.player);
+        this.inventory.onOpen(playerInventory.player);
 
         this.context = context;
         this.player = playerInventory.player;
@@ -70,28 +71,28 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
         int m;
         int l;
 
-        // craft table
+        // craft table 0 to 8 (9 slots)
         for (m = 0; m < 3; ++m) {
             for (l = 0; l < 3; ++l) {
                 this.addSlot(new Slot(this.input, l + m * 3, 16 + l * 18, 18 + m * 18));
             }
         }
 
-        // block inentory
+        // block inventory 10 to 36 (27)
         for (m = 0; m < 3; ++m) {
             for (l = 0; l < 9; ++l) {
                 // inventory, index, x, y
-                this.addSlot(new Slot(inventory, 10 + l + m * 9, 8 + l * 18, 72 + m * 18));
+                this.addSlot(new Slot(this.inventory, 10 + l + m * 9, 8 + l * 18, 72 + m * 18));
             }
         }
 
-        // The player inventory
+        // The player inventory index 9 to index 35 (27)
         for (m = 0; m < 3; ++m) {
             for (l = 0; l < 9; ++l) {
                 this.addSlot(new Slot(playerInventory, l + m * 9 + 9, 8 + l * 18, 140 + m * 18));
             }
         }
-        // The player Hotbar
+        // The player Hotbar index 0 to 8 (9)
         for (m = 0; m < 9; ++m) {
             this.addSlot(new Slot(playerInventory, m, 8 + m * 18, 198));
         }
@@ -120,6 +121,7 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
         }
 
         //update base inventory
+        //baseInventory.setStack(0, resultInventory.getStack(0).copy());
         for (int i = 0; i < 9; i++) {
             baseInventory.setStack(i + 1, craftingInventory.getStack(i).copy());
         }
@@ -211,6 +213,6 @@ public class AutoCrafterScreenHandler extends AbstractRecipeScreenHandler<Crafti
 
     @Environment(EnvType.CLIENT)
     public int getCraftingSlotCount() {
-        return 10;
+        return 9;
     }
 }

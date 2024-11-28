@@ -102,13 +102,13 @@ public class BreakerBlockEntity extends BlockEntity implements ImplementedInvent
         if (!(world instanceof ServerWorld serverWorld))
             return;
 
-        if (!world.isReceivingRedstonePower(breakerBlockEntity.getPos()) && (blockState.get(Properties.ENABLED) || blockState.get(BreakerBlock.ACTIVE)))
-            world.setBlockState(breakerBlockEntity.getPos(), blockState
+        if (!world.isReceivingRedstonePower(blockPos) && (blockState.get(Properties.ENABLED) || blockState.get(BreakerBlock.ACTIVE)))
+            world.setBlockState(blockPos, blockState
                     .with(Properties.ENABLED, false)
                     .with(BreakerBlock.ACTIVE, false));
 
-        if (!blockState.get(Properties.ENABLED) && world.isReceivingRedstonePower(breakerBlockEntity.getPos()))
-            world.setBlockState(breakerBlockEntity.getPos(), blockState.with(Properties.ENABLED, true));
+        if (!blockState.get(Properties.ENABLED) && world.isReceivingRedstonePower(blockPos))
+            world.setBlockState(blockPos, blockState.with(Properties.ENABLED, true));
 
         --breakerBlockEntity.breakerCooldown;
         if (!breakerBlockEntity.needsCooldown() && blockState.get(Properties.ENABLED) && !blockState.get(BreakerBlock.ACTIVE)) {
