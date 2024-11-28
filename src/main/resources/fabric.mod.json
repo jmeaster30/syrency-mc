@@ -1,8 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "mechanicsplus",
+  "id": "syrency",
   "version": "${version}",
-
   "name": "Syrency",
   "description": "Adds some stuff to minecraft",
   "authors": [
@@ -12,27 +11,22 @@
     "homepage": "",
     "sources": "https://github.com/jmeaster30/syrency"
   },
-
   "license": "CC0-1.0",
   "icon": "assets/modid/icon.png",
-
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.mechanicsplus.MechanicsPlusMod"
+      "com.syrency.mc.server.SyrencyMod"
     ],
     "client": [
-      "net.fabricmc.mechanicsplus.MechanicsPlusClientMod"
+      "com.syrency.mc.client.SyrencyClientMod"
     ]
   },
-  "mixins": [
-    "modid.mixins.json"
-  ],
-
+  "mixins": [],
   "depends": {
-    "fabricloader": ">=0.7.4",
+    "fabricloader": ">=0.15.11",
     "fabric": "*",
-    "minecraft": "1.16.x"
+    "minecraft": "1.21.x"
   },
   "suggests": {
     "another-mod": "*"

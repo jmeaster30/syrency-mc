@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "syrency:block/fast_hopper"
+    },
+    "facing=east": {
+      "model": "syrency:block/fast_hopper_side",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "syrency:block/fast_hopper_side"
+    },
+    "facing=south": {
+      "model": "syrency:block/fast_hopper_side",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "syrency:block/fast_hopper_side",
+      "y": 270
+    }
+  }
+}

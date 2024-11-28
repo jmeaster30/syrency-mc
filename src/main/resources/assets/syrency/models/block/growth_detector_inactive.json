@@ -1,0 +1,11 @@
+{
+  "parent": "syrency:block/full_facing_block",
+  "textures": {
+    "front": "syrency:block/growth_front",
+    "top": "syrency:block/growth_top",
+    "back": "syrency:block/growth_back_inactive",
+    "left": "syrency:block/growth_sides",
+    "right": "syrency:block/growth_sides",
+    "bottom": "syrency:block/growth_bottom"
+  }
+}

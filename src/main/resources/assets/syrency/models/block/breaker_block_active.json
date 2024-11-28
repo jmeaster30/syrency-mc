@@ -1,0 +1,8 @@
+{
+  "parent": "syrency:block/facing_block",
+  "textures": {
+    "front": "syrency:block/breaker_block_front_active",
+    "top": "syrency:block/breaker_block_top",
+    "side": "syrency:block/breaker_block_side"
+  }
+}

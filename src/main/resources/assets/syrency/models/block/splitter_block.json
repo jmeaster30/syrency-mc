@@ -1,0 +1,11 @@
+{
+  "parent": "syrency:block/full_facing_block",
+  "textures": {
+    "front": "syrency:block/splitter_out_mark",
+    "top": "syrency:block/splitter_out_mark",
+    "back": "syrency:block/splitter_out",
+    "left": "syrency:block/splitter_out",
+    "right": "syrency:block/splitter_out",
+    "bottom": "syrency:block/splitter_out"
+  }
+}

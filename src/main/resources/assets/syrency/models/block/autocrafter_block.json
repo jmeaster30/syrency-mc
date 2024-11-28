@@ -1,0 +1,8 @@
+{
+  "parent": "syrency:block/table_block",
+  "textures": {
+    "bottom": "syrency:block/autocrafter_bottom",
+    "top": "syrency:block/autocrafter_top",
+    "side": "syrency:block/autocrafter_side"
+  }
+}
